@@ -15,10 +15,11 @@ public partial class AddTransactionViewModel : BaseViewModel
 
     [ObservableProperty] private ObservableCollection<Account> accounts = new();
     [ObservableProperty] private ObservableCollection<Category> categories = new();
+    [ObservableProperty] private ObservableCollection<CurrencyInfo> availableCurrencies = new();
     [ObservableProperty] private Account? selectedAccount;
     [ObservableProperty] private Category? selectedCategory;
+    [ObservableProperty] private CurrencyInfo? selectedCurrency;
     [ObservableProperty] private decimal amount;
-    [ObservableProperty] private string currency = "PLN";
     [ObservableProperty] private DateTime date = DateTime.Now;
     [ObservableProperty] private string? note;
     [ObservableProperty] private bool isExpense = true;
@@ -33,6 +34,11 @@ public partial class AddTransactionViewModel : BaseViewModel
     [RelayCommand]
     public async Task LoadAsync()
     {
+        if (AvailableCurrencies.Count == 0)
+        {
+            foreach (var c in SupportedCurrencies.All) AvailableCurrencies.Add(c);
+        }
+
         var accs = await _db.GetAccountsAsync();
         var cats = await _db.GetCategoriesAsync();
         Accounts.Clear();
@@ -43,7 +49,8 @@ public partial class AddTransactionViewModel : BaseViewModel
 
         SelectedAccount ??= Accounts.FirstOrDefault();
         SelectedCategory ??= Categories.FirstOrDefault();
-        if (SelectedAccount is not null) Currency = SelectedAccount.Currency;
+        if (SelectedAccount is not null)
+            SelectedCurrency = SupportedCurrencies.Find(SelectedAccount.Currency) ?? AvailableCurrencies[0];
     }
 
     partial void OnIsExpenseChanged(bool value)
@@ -53,13 +60,14 @@ public partial class AddTransactionViewModel : BaseViewModel
 
     partial void OnSelectedAccountChanged(Account? value)
     {
-        if (value is not null) Currency = value.Currency;
+        if (value is not null)
+            SelectedCurrency = SupportedCurrencies.Find(value.Currency) ?? SelectedCurrency;
     }
 
     [RelayCommand]
     private async Task SaveAsync()
     {
-        if (SelectedAccount is null || SelectedCategory is null || Amount <= 0)
+        if (SelectedAccount is null || SelectedCategory is null || SelectedCurrency is null || Amount <= 0)
         {
             if (Application.Current?.MainPage is not null)
                 await Application.Current.MainPage.DisplayAlert("Проверка", "Заполните все поля.", "OK");
@@ -67,7 +75,8 @@ public partial class AddTransactionViewModel : BaseViewModel
         }
 
         var settings = await _db.GetSettingsAsync();
-        var rate = await _rates.ConvertAsync(1m, Currency, settings.BaseCurrency);
+        var currency = SelectedCurrency.Code;
+        var rate = await _rates.ConvertAsync(1m, currency, settings.BaseCurrency);
 
         var signedAmount = IsExpense ? -Math.Abs(Amount) : Math.Abs(Amount);
 
@@ -76,7 +85,7 @@ public partial class AddTransactionViewModel : BaseViewModel
             AccountId = SelectedAccount.Id,
             CategoryId = SelectedCategory.Id,
             Amount = signedAmount,
-            Currency = Currency,
+            Currency = currency,
             Date = Date.ToUniversalTime(),
             Note = Note,
             ExchangeRateToBase = rate

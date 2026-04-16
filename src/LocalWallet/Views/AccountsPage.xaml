@@ -7,27 +7,53 @@
              x:DataType="vm:AccountsViewModel"
              Title="Счета">
 
-    <Grid RowDefinitions="Auto,*" Padding="16" RowSpacing="12">
+    <Grid RowDefinitions="Auto,*" Padding="16" RowSpacing="14">
 
-        <VerticalStackLayout Grid.Row="0" Spacing="8">
-            <Label Text="Новый счёт" FontAttributes="Bold" />
-            <Entry Placeholder="Название" Text="{Binding NewAccountName, Mode=TwoWay}" />
-            <Label Text="Валюта" FontSize="12" TextColor="{StaticResource Gray500}" />
-            <Picker ItemsSource="{Binding AvailableCurrencies}"
-                    SelectedItem="{Binding SelectedCurrency, Mode=TwoWay}"
-                    ItemDisplayBinding="{Binding Display}"
-                    Title="Выберите валюту" />
-            <Entry Placeholder="Начальный баланс"
-                   Text="{Binding NewAccountInitialBalance, Mode=TwoWay}"
-                   Keyboard="Numeric" />
-            <Button Text="Добавить"
-                    Command="{Binding AddCommand}" />
-        </VerticalStackLayout>
+        <Border Grid.Row="0" Style="{StaticResource Card}">
+            <VerticalStackLayout Spacing="10">
+                <Label Text="Новый счёт" Style="{StaticResource SectionHeader}" />
+
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="Название" Style="{StaticResource FieldLabel}" />
+                    <Border Style="{StaticResource InputWrap}">
+                        <Entry Placeholder="Например: Кошелёк, Банк, Карта"
+                               Text="{Binding NewAccountName, Mode=TwoWay}" />
+                    </Border>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="Валюта" Style="{StaticResource FieldLabel}" />
+                    <Border Style="{StaticResource InputWrap}">
+                        <Picker ItemsSource="{Binding AvailableCurrencies}"
+                                SelectedItem="{Binding SelectedCurrency, Mode=TwoWay}"
+                                ItemDisplayBinding="{Binding Display}"
+                                Title="Выберите валюту" />
+                    </Border>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="Начальный баланс" Style="{StaticResource FieldLabel}" />
+                    <Border Style="{StaticResource InputWrap}">
+                        <Entry Placeholder="0.00"
+                               Text="{Binding NewAccountInitialBalance, Mode=TwoWay}"
+                               Keyboard="Numeric" />
+                    </Border>
+                </VerticalStackLayout>
+
+                <Button Text="Добавить счёт" Command="{Binding AddCommand}" Margin="0,4,0,0" />
+            </VerticalStackLayout>
+        </Border>
 
         <CollectionView Grid.Row="1" ItemsSource="{Binding Items}" SelectionMode="None">
+            <CollectionView.EmptyView>
+                <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Padding="20" Spacing="6">
+                    <Label Text="Пока нет счетов" FontSize="14" TextColor="{StaticResource Gray500}" HorizontalOptions="Center" />
+                    <Label Text="Создайте первый выше" FontSize="12" TextColor="{StaticResource Gray500}" HorizontalOptions="Center" />
+                </VerticalStackLayout>
+            </CollectionView.EmptyView>
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="m:Account">
-                    <SwipeView>
+                    <SwipeView Margin="0,4">
                         <SwipeView.RightItems>
                             <SwipeItems>
                                 <SwipeItem Text="Удалить"
@@ -36,17 +62,25 @@
                                            CommandParameter="{Binding .}" />
                             </SwipeItems>
                         </SwipeView.RightItems>
-                        <Grid Padding="12" ColumnDefinitions="*,Auto">
-                            <Label Grid.Column="0" Text="{Binding Name}" FontAttributes="Bold" VerticalOptions="Center" />
-                            <Label Grid.Column="1" VerticalOptions="Center">
-                                <Label.Text>
-                                    <MultiBinding StringFormat="{}{0:0.00} {1}">
-                                        <Binding Path="InitialBalance" />
-                                        <Binding Path="Currency" />
-                                    </MultiBinding>
-                                </Label.Text>
-                            </Label>
-                        </Grid>
+                        <Border Style="{StaticResource Card}" Padding="14">
+                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="10">
+                                <Label Grid.Row="0" Grid.Column="0"
+                                       Text="{Binding Name}" FontAttributes="Bold" FontSize="16" />
+                                <Label Grid.Row="1" Grid.Column="0"
+                                       Text="{Binding Currency}" FontSize="12"
+                                       TextColor="{StaticResource Gray500}" />
+                                <Label Grid.Row="0" Grid.RowSpan="2" Grid.Column="1"
+                                       VerticalOptions="Center"
+                                       FontAttributes="Bold" FontSize="16">
+                                    <Label.Text>
+                                        <MultiBinding StringFormat="{}{0:0.00} {1}">
+                                            <Binding Path="InitialBalance" />
+                                            <Binding Path="Currency" />
+                                        </MultiBinding>
+                                    </Label.Text>
+                                </Label>
+                            </Grid>
+                        </Border>
                     </SwipeView>
                 </DataTemplate>
             </CollectionView.ItemTemplate>

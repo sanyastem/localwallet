@@ -179,6 +179,9 @@ public partial class SettingsViewModel : BaseViewModel
     private async Task OpenCategoriesAsync() => await Shell.Current.GoToAsync(nameof(CategoriesPage));
 
     [RelayCommand]
+    private async Task OpenFamiliesAsync() => await Shell.Current.GoToAsync(nameof(FamilyListPage));
+
+    [RelayCommand]
     private async Task ResetAllAsync()
     {
         if (Application.Current?.MainPage is null) return;

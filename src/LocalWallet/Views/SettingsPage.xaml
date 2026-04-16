@@ -84,6 +84,7 @@
             <Label Text="Справочники" FontSize="18" FontAttributes="Bold" />
             <Button Text="Счета" Command="{Binding OpenAccountsCommand}" />
             <Button Text="Категории" Command="{Binding OpenCategoriesCommand}" />
+            <Button Text="Семьи и синхронизация" Command="{Binding OpenFamiliesCommand}" />
 
             <BoxView HeightRequest="1" Color="{StaticResource Gray300}" />
 

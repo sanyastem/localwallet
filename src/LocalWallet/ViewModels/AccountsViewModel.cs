@@ -12,8 +12,9 @@ public partial class AccountsViewModel : BaseViewModel
     private readonly IDatabaseService _db;
 
     [ObservableProperty] private ObservableCollection<Account> items = new();
+    [ObservableProperty] private ObservableCollection<CurrencyInfo> availableCurrencies = new();
     [ObservableProperty] private string newAccountName = string.Empty;
-    [ObservableProperty] private string newAccountCurrency = "PLN";
+    [ObservableProperty] private CurrencyInfo? selectedCurrency;
     [ObservableProperty] private decimal newAccountInitialBalance;
 
     public AccountsViewModel(IDatabaseService db)
@@ -25,6 +26,17 @@ public partial class AccountsViewModel : BaseViewModel
     [RelayCommand]
     public async Task LoadAsync()
     {
+        if (AvailableCurrencies.Count == 0)
+        {
+            foreach (var c in SupportedCurrencies.All) AvailableCurrencies.Add(c);
+        }
+
+        if (SelectedCurrency is null)
+        {
+            var settings = await _db.GetSettingsAsync();
+            SelectedCurrency = SupportedCurrencies.Find(settings.BaseCurrency) ?? AvailableCurrencies[0];
+        }
+
         var list = await _db.GetAccountsAsync();
         Items.Clear();
         foreach (var a in list) Items.Add(a);
@@ -33,11 +45,11 @@ public partial class AccountsViewModel : BaseViewModel
     [RelayCommand]
     private async Task AddAsync()
     {
-        if (string.IsNullOrWhiteSpace(NewAccountName)) return;
+        if (string.IsNullOrWhiteSpace(NewAccountName) || SelectedCurrency is null) return;
         var account = new Account
         {
             Name = NewAccountName.Trim(),
-            Currency = NewAccountCurrency.ToUpperInvariant(),
+            Currency = SelectedCurrency.Code,
             InitialBalance = NewAccountInitialBalance
         };
         await _db.SaveAccountAsync(account);

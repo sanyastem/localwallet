@@ -12,23 +12,19 @@
         <VerticalStackLayout Grid.Row="0" Spacing="8">
             <Label Text="Новый счёт" FontAttributes="Bold" />
             <Entry Placeholder="Название" Text="{Binding NewAccountName, Mode=TwoWay}" />
-            <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
-                <Entry Grid.Column="0"
-                       Placeholder="Валюта (напр. PLN)"
-                       Text="{Binding NewAccountCurrency, Mode=TwoWay}"
-                       MaxLength="3" />
-                <Entry Grid.Column="1"
-                       Placeholder="Начальный баланс"
-                       Text="{Binding NewAccountInitialBalance, Mode=TwoWay}"
-                       Keyboard="Numeric" />
-            </Grid>
+            <Label Text="Валюта" FontSize="12" TextColor="{StaticResource Gray500}" />
+            <Picker ItemsSource="{Binding AvailableCurrencies}"
+                    SelectedItem="{Binding SelectedCurrency, Mode=TwoWay}"
+                    ItemDisplayBinding="{Binding Display}"
+                    Title="Выберите валюту" />
+            <Entry Placeholder="Начальный баланс"
+                   Text="{Binding NewAccountInitialBalance, Mode=TwoWay}"
+                   Keyboard="Numeric" />
             <Button Text="Добавить"
-                    Command="{Binding AddCommand}"
-                    BackgroundColor="{StaticResource Primary}"
-                    TextColor="White" />
+                    Command="{Binding AddCommand}" />
         </VerticalStackLayout>
 
-        <CollectionView Grid.Row="1" ItemsSource="{Binding Items}">
+        <CollectionView Grid.Row="1" ItemsSource="{Binding Items}" SelectionMode="None">
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="m:Account">
                     <SwipeView>
@@ -41,8 +37,8 @@
                             </SwipeItems>
                         </SwipeView.RightItems>
                         <Grid Padding="12" ColumnDefinitions="*,Auto">
-                            <Label Grid.Column="0" Text="{Binding Name}" FontAttributes="Bold" />
-                            <Label Grid.Column="1">
+                            <Label Grid.Column="0" Text="{Binding Name}" FontAttributes="Bold" VerticalOptions="Center" />
+                            <Label Grid.Column="1" VerticalOptions="Center">
                                 <Label.Text>
                                     <MultiBinding StringFormat="{}{0:0.00} {1}">
                                         <Binding Path="InitialBalance" />

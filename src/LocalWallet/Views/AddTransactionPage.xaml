@@ -30,7 +30,10 @@
             <Entry Text="{Binding Amount}" Keyboard="Numeric" Placeholder="0.00" />
 
             <Label Text="Валюта" />
-            <Entry Text="{Binding Currency}" MaxLength="3" />
+            <Picker ItemsSource="{Binding AvailableCurrencies}"
+                    SelectedItem="{Binding SelectedCurrency, Mode=TwoWay}"
+                    ItemDisplayBinding="{Binding Display}"
+                    Title="Выберите валюту" />
 
             <Label Text="Счёт" />
             <Picker ItemsSource="{Binding Accounts}"

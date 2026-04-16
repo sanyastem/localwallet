@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:LocalWallet.ViewModels"
+             xmlns:m="clr-namespace:LocalWallet.Models"
+             x:Class="LocalWallet.Views.AddTransactionPage"
+             x:DataType="vm:AddTransactionViewModel"
+             Title="Новая операция">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="14">
+
+            <HorizontalStackLayout Spacing="10">
+                <RadioButton Content="Расход"
+                             IsChecked="{Binding IsExpense, Mode=TwoWay}"
+                             GroupName="txType" />
+                <RadioButton Content="Доход"
+                             GroupName="txType">
+                    <RadioButton.IsChecked>
+                        <Binding Path="IsExpense" Mode="TwoWay">
+                            <Binding.Converter>
+                                <x:StaticResource Key="InverseBool" />
+                            </Binding.Converter>
+                        </Binding>
+                    </RadioButton.IsChecked>
+                </RadioButton>
+            </HorizontalStackLayout>
+
+            <Label Text="Сумма" />
+            <Entry Text="{Binding Amount}" Keyboard="Numeric" Placeholder="0.00" />
+
+            <Label Text="Валюта" />
+            <Entry Text="{Binding Currency}" MaxLength="3" />
+
+            <Label Text="Счёт" />
+            <Picker ItemsSource="{Binding Accounts}"
+                    ItemDisplayBinding="{Binding Name}"
+                    SelectedItem="{Binding SelectedAccount, Mode=TwoWay}" />
+
+            <Label Text="Категория" />
+            <Picker ItemsSource="{Binding Categories}"
+                    ItemDisplayBinding="{Binding Name}"
+                    SelectedItem="{Binding SelectedCategory, Mode=TwoWay}" />
+
+            <Label Text="Дата" />
+            <DatePicker Date="{Binding Date, Mode=TwoWay}" />
+
+            <Label Text="Заметка" />
+            <Editor Text="{Binding Note, Mode=TwoWay}" HeightRequest="80" AutoSize="TextChanges" />
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="10" Margin="0,12,0,0">
+                <Button Grid.Column="0"
+                        Text="Отмена"
+                        Command="{Binding CancelCommand}"
+                        BackgroundColor="{StaticResource Gray300}"
+                        TextColor="Black" />
+                <Button Grid.Column="1"
+                        Text="Сохранить"
+                        Command="{Binding SaveCommand}"
+                        BackgroundColor="{StaticResource Primary}"
+                        TextColor="White" />
+            </Grid>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

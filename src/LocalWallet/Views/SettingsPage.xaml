@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:LocalWallet.ViewModels"
+             x:Class="LocalWallet.Views.SettingsPage"
+             x:DataType="vm:SettingsViewModel"
+             Title="Настройки">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="18">
+
+            <Label Text="Валюты" FontSize="18" FontAttributes="Bold" />
+
+            <Label Text="Базовая валюта (3 буквы)" />
+            <Entry Text="{Binding BaseCurrency, Mode=TwoWay}" MaxLength="3" />
+
+            <Label Text="Отображаемые валюты (через запятую)" />
+            <Entry Text="{Binding DisplayCurrencies, Mode=TwoWay}" Placeholder="PLN,EUR,USD" />
+
+            <Button Text="Сохранить валюты"
+                    Command="{Binding SaveCurrencyCommand}"
+                    BackgroundColor="{StaticResource Primary}" TextColor="White" />
+
+            <BoxView HeightRequest="1" Color="{StaticResource Gray300}" />
+
+            <Label Text="Безопасность" FontSize="18" FontAttributes="Bold" />
+            <Grid ColumnDefinitions="*,Auto">
+                <Label Grid.Column="0" Text="Биометрия при входе" VerticalOptions="Center" />
+                <Switch Grid.Column="1"
+                        IsToggled="{Binding BiometricEnabled, Mode=TwoWay}"
+                        Toggled="OnBiometricToggled" />
+            </Grid>
+
+            <BoxView HeightRequest="1" Color="{StaticResource Gray300}" />
+
+            <Label Text="Справочники" FontSize="18" FontAttributes="Bold" />
+            <Button Text="Счета" Command="{Binding OpenAccountsCommand}" />
+            <Button Text="Категории" Command="{Binding OpenCategoriesCommand}" />
+
+            <BoxView HeightRequest="1" Color="{StaticResource Gray300}" />
+
+            <Label Text="Курсы валют" FontSize="18" FontAttributes="Bold" />
+            <Label FontSize="12" TextColor="{StaticResource Gray500}">
+                <Label.Text>
+                    <MultiBinding StringFormat="Последнее обновление: {0}">
+                        <Binding Path="LastRatesUpdateText" />
+                    </MultiBinding>
+                </Label.Text>
+            </Label>
+            <Button Text="Обновить курсы" Command="{Binding RefreshRatesCommand}" />
+
+            <BoxView HeightRequest="1" Color="{StaticResource Gray300}" />
+
+            <Label Text="Данные" FontSize="18" FontAttributes="Bold" />
+
+            <Button Text="Экспорт в CSV" Command="{Binding ExportCsvCommand}" />
+
+            <Label Text="Удалить операции за период" />
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                <DatePicker Grid.Column="0" Date="{Binding DeleteFromDate, Mode=TwoWay}" />
+                <DatePicker Grid.Column="1" Date="{Binding DeleteToDate, Mode=TwoWay}" />
+            </Grid>
+            <Button Text="Удалить за период"
+                    Command="{Binding DeletePeriodCommand}"
+                    BackgroundColor="#D32F2F" TextColor="White" />
+
+            <Button Text="Сбросить все данные"
+                    Command="{Binding ResetAllCommand}"
+                    BackgroundColor="#B71C1C" TextColor="White" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

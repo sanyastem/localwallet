@@ -3,7 +3,7 @@ using System.Text.Json;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LocalWallet.Services.Crypto;
-using LocalWallet.Services.Family;
+using LocalWallet.Services.Families;
 using LocalWallet.Services.Sync;
 using LocalWallet.ViewModels.Base;
 using LocalWallet.Views;

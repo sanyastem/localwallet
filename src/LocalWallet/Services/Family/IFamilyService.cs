@@ -1,6 +1,6 @@
 using LocalWallet.Models;
 
-namespace LocalWallet.Services.Family;
+namespace LocalWallet.Services.Families;
 
 public interface IFamilyService
 {

@@ -1,7 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using LocalWallet.Services.Family;
+using LocalWallet.Services.Families;
 using LocalWallet.ViewModels.Base;
 using LocalWallet.Views;
 

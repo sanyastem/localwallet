@@ -7,7 +7,7 @@ using System.Text.Json;
 using LocalWallet.Services.Crypto;
 using LocalWallet.Services.Sync;
 
-namespace LocalWallet.Services.Family;
+namespace LocalWallet.Services.Families;
 
 public class PairingHostMessages
 {

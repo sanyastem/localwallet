@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace LocalWallet.Services.Family;
+namespace LocalWallet.Services.Families;
 
 public record InvitationPayload(
     string V,

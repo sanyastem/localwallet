@@ -1,4 +1,5 @@
 using LocalWallet.Services;
+using LocalWallet.Services.Crypto;
 using LocalWallet.Services.Database;
 using LocalWallet.Services.ExchangeRates;
 using LocalWallet.ViewModels;
@@ -34,6 +35,8 @@ public static class MauiProgram
         builder.Services.AddSingleton<NbpRatesProvider>();
         builder.Services.AddSingleton<FrankfurterRatesProvider>();
         builder.Services.AddSingleton<IExchangeRateService, ExchangeRateService>();
+        builder.Services.AddSingleton<IDeviceIdentityService, DeviceIdentityService>();
+        builder.Services.AddSingleton<IFamilyCryptoService, FamilyCryptoService>();
 
         // ViewModels
         builder.Services.AddTransient<DashboardViewModel>();

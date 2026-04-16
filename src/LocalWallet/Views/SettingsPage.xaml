@@ -64,6 +64,23 @@
 
             <BoxView HeightRequest="1" Color="{StaticResource Gray300}" />
 
+            <Label Text="Это устройство" FontSize="18" FontAttributes="Bold" />
+            <Label Text="Имя устройства (будет видно другим участникам семьи)"
+                   Style="{StaticResource FieldLabel}" />
+            <Border Style="{StaticResource InputWrap}">
+                <Entry Text="{Binding DeviceDisplayName, Mode=TwoWay}" Placeholder="Моё устройство" />
+            </Border>
+            <Button Text="Сохранить имя" Command="{Binding SaveDeviceNameCommand}" />
+            <Label FontSize="12" TextColor="{StaticResource Gray500}">
+                <Label.Text>
+                    <MultiBinding StringFormat="ID устройства: {0}">
+                        <Binding Path="DeviceIdShort" />
+                    </MultiBinding>
+                </Label.Text>
+            </Label>
+
+            <BoxView HeightRequest="1" Color="{StaticResource Gray300}" />
+
             <Label Text="Справочники" FontSize="18" FontAttributes="Bold" />
             <Button Text="Счета" Command="{Binding OpenAccountsCommand}" />
             <Button Text="Категории" Command="{Binding OpenCategoriesCommand}" />

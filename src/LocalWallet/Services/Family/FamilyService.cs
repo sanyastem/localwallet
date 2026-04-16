@@ -1,7 +1,7 @@
 using LocalWallet.Services.Crypto;
 using LocalWallet.Services.Database;
 
-namespace LocalWallet.Services.Family;
+namespace LocalWallet.Services.Families;
 
 public class FamilyService : IFamilyService
 {

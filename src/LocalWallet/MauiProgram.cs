@@ -2,7 +2,7 @@ using LocalWallet.Services;
 using LocalWallet.Services.Crypto;
 using LocalWallet.Services.Database;
 using LocalWallet.Services.ExchangeRates;
-using LocalWallet.Services.Family;
+using LocalWallet.Services.Families;
 using LocalWallet.Services.Sync;
 using LocalWallet.ViewModels;
 using LocalWallet.Views;

@@ -16,7 +16,7 @@ public class SyncService : ISyncService
     private readonly IDeviceIdentityService _identity;
     private readonly IEventStore _events;
     private readonly IFamilyCryptoService _crypto;
-    private readonly Family.IFamilyService _families;
+    private readonly Families.IFamilyService _families;
 
     private TcpListener? _listener;
     private CancellationTokenSource? _listenerCts;
@@ -27,7 +27,7 @@ public class SyncService : ISyncService
         IDeviceIdentityService identity,
         IEventStore events,
         IFamilyCryptoService crypto,
-        Family.IFamilyService families)
+        Families.IFamilyService families)
     {
         _db = db;
         _identity = identity;

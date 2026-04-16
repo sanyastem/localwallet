@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:LocalWallet.ViewModels"
+             xmlns:m="clr-namespace:LocalWallet.Models"
              x:Class="LocalWallet.Views.SettingsPage"
              x:DataType="vm:SettingsViewModel"
              Title="Настройки">
@@ -11,25 +12,55 @@
 
             <Label Text="Валюты" FontSize="18" FontAttributes="Bold" />
 
-            <Label Text="Базовая валюта (3 буквы)" />
-            <Entry Text="{Binding BaseCurrency, Mode=TwoWay}" MaxLength="3" />
+            <Label Text="Базовая валюта" />
+            <Picker ItemsSource="{Binding AvailableCurrencies}"
+                    SelectedItem="{Binding SelectedBaseCurrency, Mode=TwoWay}"
+                    ItemDisplayBinding="{Binding Display}"
+                    Title="Выберите валюту" />
 
-            <Label Text="Отображаемые валюты (через запятую)" />
-            <Entry Text="{Binding DisplayCurrencies, Mode=TwoWay}" Placeholder="PLN,EUR,USD" />
+            <Label Text="Отображаемые валюты" />
+            <Border Style="{StaticResource Card}" Padding="4">
+                <CollectionView ItemsSource="{Binding DisplayChoices}"
+                                SelectionMode="None"
+                                HeightRequest="360">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="vm:CurrencyChoice">
+                            <Grid Padding="8,6" ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                <Label Grid.Column="0"
+                                       Text="{Binding Currency.Display}"
+                                       VerticalOptions="Center" />
+                                <CheckBox Grid.Column="1"
+                                          IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                          Color="{StaticResource Primary}"
+                                          VerticalOptions="Center" />
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </Border>
 
             <Button Text="Сохранить валюты"
-                    Command="{Binding SaveCurrencyCommand}"
-                    BackgroundColor="{StaticResource Primary}" TextColor="White" />
+                    Command="{Binding SaveCurrencyCommand}" />
 
             <BoxView HeightRequest="1" Color="{StaticResource Gray300}" />
 
             <Label Text="Безопасность" FontSize="18" FontAttributes="Bold" />
-            <Grid ColumnDefinitions="*,Auto">
-                <Label Grid.Column="0" Text="Биометрия при входе" VerticalOptions="Center" />
+            <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding BiometricAvailable}">
+                <VerticalStackLayout Grid.Column="0" Spacing="2">
+                    <Label Text="Биометрия при входе" FontAttributes="Bold" />
+                    <Label Text="Отпечаток / лицо при запуске"
+                           FontSize="12" TextColor="{StaticResource Gray500}" />
+                </VerticalStackLayout>
                 <Switch Grid.Column="1"
+                        OnColor="{StaticResource Primary}"
                         IsToggled="{Binding BiometricEnabled, Mode=TwoWay}"
-                        Toggled="OnBiometricToggled" />
+                        Toggled="OnBiometricToggled"
+                        VerticalOptions="Center" />
             </Grid>
+            <Label Text="Биометрия на устройстве не настроена"
+                   FontSize="12"
+                   TextColor="{StaticResource Gray500}"
+                   IsVisible="{Binding BiometricAvailable, Converter={StaticResource InverseBool}}" />
 
             <BoxView HeightRequest="1" Color="{StaticResource Gray300}" />
 

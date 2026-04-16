@@ -42,6 +42,11 @@ public class DatabaseService : IDatabaseService
             await _db.InsertAsync(new AppSettings());
             await SeedDefaultCategoriesAsync(_db);
         }
+        else if (!settings.IsOnboarded && settings.LastRatesUpdate.HasValue)
+        {
+            settings.IsOnboarded = true;
+            await _db.UpdateAsync(settings);
+        }
 
         _initialized = true;
     }

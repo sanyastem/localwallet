@@ -7,7 +7,8 @@ namespace LocalWallet.Services.ExchangeRates;
 public class NbpRatesProvider
 {
     private readonly IHttpClientFactory _httpFactory;
-    private const string Endpoint = "https://api.nbp.pl/api/exchangerates/tables/A?format=json";
+    private const string TableA = "https://api.nbp.pl/api/exchangerates/tables/A?format=json";
+    private const string TableB = "https://api.nbp.pl/api/exchangerates/tables/B?format=json";
 
     public NbpRatesProvider(IHttpClientFactory httpFactory)
     {
@@ -21,24 +22,32 @@ public class NbpRatesProvider
             using var client = _httpFactory.CreateClient();
             client.Timeout = TimeSpan.FromSeconds(15);
 
-            var tables = await client.GetFromJsonAsync<List<NbpTable>>(Endpoint, ct);
-            if (tables is null || tables.Count == 0) return null;
+            var tasks = new[] { TableA, TableB }
+                .Select(url => client.GetFromJsonAsync<List<NbpTable>>(url, ct))
+                .ToArray();
+            var tables = (await Task.WhenAll(tasks))
+                .Where(t => t is { Count: > 0 })
+                .SelectMany(t => t![0].Rates ?? Enumerable.Empty<NbpRate>())
+                .Where(r => !string.IsNullOrWhiteSpace(r.Code) && r.Mid > 0)
+                .GroupBy(r => r.Code!.ToUpperInvariant())
+                .Select(g => g.First())
+                .ToList();
 
-            var table = tables[0];
+            if (tables.Count == 0) return null;
+
             var now = DateTime.UtcNow;
             var list = new List<ExchangeRate>
             {
                 new() { BaseCurrency = "PLN", TargetCurrency = "PLN", Rate = 1m, FetchedAt = now, Source = "NBP" }
             };
 
-            foreach (var r in table.Rates ?? Enumerable.Empty<NbpRate>())
+            foreach (var r in tables)
             {
-                if (string.IsNullOrEmpty(r.Code)) continue;
                 list.Add(new ExchangeRate
                 {
                     BaseCurrency = "PLN",
-                    TargetCurrency = r.Code,
-                    Rate = r.Mid == 0 ? 1m : 1m / r.Mid,
+                    TargetCurrency = r.Code!.ToUpperInvariant(),
+                    Rate = 1m / r.Mid,
                     FetchedAt = now,
                     Source = "NBP"
                 });

@@ -11,8 +11,8 @@
 
 		<ApplicationTitle>LocalWallet</ApplicationTitle>
 		<ApplicationId>com.sanyastem.localwallet</ApplicationId>
-		<ApplicationDisplayVersion>2.0.4</ApplicationDisplayVersion>
-		<ApplicationVersion>12</ApplicationVersion>
+		<ApplicationDisplayVersion>2.0.5</ApplicationDisplayVersion>
+		<ApplicationVersion>13</ApplicationVersion>
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">24.0</SupportedOSPlatformVersion>
 	</PropertyGroup>
@@ -36,7 +36,6 @@
 		<PackageReference Include="NSec.Cryptography" Version="25.4.0" />
 		<PackageReference Include="Zeroconf" Version="3.7.16" />
 		<PackageReference Include="QRCoder" Version="1.8.0" />
-		<PackageReference Include="ZXing.Net.Maui.Controls" Version="0.7.0" />
 	</ItemGroup>
 
 </Project>

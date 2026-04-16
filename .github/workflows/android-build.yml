@@ -101,11 +101,13 @@ jobs:
         if: always() && steps.publish.outcome == 'failure'
         shell: bash
         run: |
+          set +e
           if [ ! -f /tmp/publish.log ]; then exit 0; fi
           grep -nE 'error [A-Z]+[0-9]+|: error|FAILED|error MSB|error XA|error XAMLC|error XLS|error NU' /tmp/publish.log | head -40 | while IFS= read -r line; do
             safe=$(printf '%s' "$line" | sed 's/%/%25/g; s/\r//g' | tr '\n' ' ')
             echo "::error::$safe"
           done
+          exit 0
 
       - name: Push build log to ci-log branch (on failure)
         if: always() && steps.publish.outcome == 'failure'

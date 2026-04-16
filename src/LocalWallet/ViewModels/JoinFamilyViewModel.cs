@@ -6,7 +6,6 @@ using LocalWallet.Services.Crypto;
 using LocalWallet.Services.Families;
 using LocalWallet.Services.Sync;
 using LocalWallet.ViewModels.Base;
-using LocalWallet.Views;
 
 namespace LocalWallet.ViewModels;
 
@@ -17,15 +16,14 @@ public partial class JoinFamilyViewModel : BaseViewModel
     private readonly IPairingService _pairing;
     private readonly IFamilyCryptoService _crypto;
 
-    [ObservableProperty] private string status = "Наведите камеру на QR-код пригласившего";
+    [ObservableProperty] private string inviteJson = string.Empty;
+    [ObservableProperty] private string status = "Вставьте JSON приглашения из QR-кода";
     [ObservableProperty] private string sas = string.Empty;
     [ObservableProperty] private string peerDisplayName = string.Empty;
     [ObservableProperty] private bool sasVisible;
-    [ObservableProperty] private bool cameraEnabled = true;
 
     private InvitationPayload? _invite;
     private PairingClientSession? _session;
-    private string? _pendingPeerDeviceId;
 
     public JoinFamilyViewModel(
         IFamilyService families,
@@ -41,17 +39,35 @@ public partial class JoinFamilyViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    public async Task HandleScanAsync(string? content)
+    private async Task PasteAsync()
     {
-        if (string.IsNullOrWhiteSpace(content) || _invite is not null) return;
-        var payload = InvitationCodec.Decode(content);
-        if (payload is null)
+        try
         {
-            Status = "Это не QR-код приглашения LocalWallet";
+            var text = await Clipboard.Default.GetTextAsync();
+            if (!string.IsNullOrWhiteSpace(text)) InviteJson = text;
+        }
+        catch { }
+    }
+
+    [RelayCommand]
+    private async Task ConnectAsync()
+    {
+        if (_invite is not null || IsBusy) return;
+        if (string.IsNullOrWhiteSpace(InviteJson))
+        {
+            Status = "Вставьте JSON приглашения";
             return;
         }
+
+        var payload = InvitationCodec.Decode(InviteJson.Trim());
+        if (payload is null)
+        {
+            Status = "Это не JSON приглашения LocalWallet";
+            return;
+        }
+
         _invite = payload;
-        CameraEnabled = false;
+        IsBusy = true;
         Status = $"Подключение к {payload.FamilyName} ({payload.Ip}:{payload.Port})…";
 
         await _identity.InitializeAsync();
@@ -86,7 +102,6 @@ public partial class JoinFamilyViewModel : BaseViewModel
 
             var peerPub = Convert.FromBase64String(hostHello.EphemeralPubBase64);
             var peerSalt = Convert.FromBase64String(hostHello.SaltBase64);
-            _pendingPeerDeviceId = hostHello.DeviceId;
             PeerDisplayName = hostHello.DisplayName;
 
             var combined = new byte[mySalt.Length + peerSalt.Length];
@@ -105,6 +120,10 @@ public partial class JoinFamilyViewModel : BaseViewModel
         {
             Status = "Ошибка: " + ex.Message;
             Reset();
+        }
+        finally
+        {
+            IsBusy = false;
         }
     }
 
@@ -137,8 +156,8 @@ public partial class JoinFamilyViewModel : BaseViewModel
             SasVisible = false;
             Reset();
 
-            if (Application.Current?.MainPage is not null)
-                await Application.Current.MainPage.DisplayAlert("Готово", $"Семья «{bundle.FamilyName}» добавлена.", "OK");
+            if (Application.Current?.Windows.Count > 0 && Application.Current.Windows[0].Page is not null)
+                await Application.Current.Windows[0].Page!.DisplayAlertAsync("Готово", $"Семья «{bundle.FamilyName}» добавлена.", "OK");
             await Shell.Current.GoToAsync($"..?id={fid}");
         }
         catch (Exception ex)
@@ -151,8 +170,7 @@ public partial class JoinFamilyViewModel : BaseViewModel
     private void Cancel()
     {
         Reset();
-        CameraEnabled = true;
-        Status = "Отменено. Наведите камеру на QR.";
+        Status = "Отменено. Вставьте новое приглашение.";
     }
 
     private void Reset()
@@ -162,7 +180,6 @@ public partial class JoinFamilyViewModel : BaseViewModel
         _session?.Ours.Clear();
         _session = null;
         _invite = null;
-        _pendingPeerDeviceId = null;
     }
 
     private static async Task SendJsonAsync<T>(NetworkStream stream, T payload)

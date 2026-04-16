@@ -2,22 +2,33 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:LocalWallet.ViewModels"
-             xmlns:zx="clr-namespace:ZXing.Net.Maui.Controls;assembly=ZXing.Net.Maui"
              x:Class="LocalWallet.Views.JoinFamilyPage"
              x:DataType="vm:JoinFamilyViewModel"
              Title="Присоединиться">
 
-    <Grid RowDefinitions="*,Auto">
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="14">
 
-        <zx:CameraBarcodeReaderView Grid.Row="0"
-                                    x:Name="Scanner"
-                                    BarcodesDetected="OnBarcodesDetected"
-                                    IsDetecting="{Binding CameraEnabled}" />
+            <Label Text="Присоединиться к семье" Style="{StaticResource SectionHeader}" />
+            <Label Text="На устройстве-владельце откройте «Пригласить» — покажется QR-код. Ниже вставьте JSON-содержимое QR (декодируется любым сканером)."
+                   Style="{StaticResource FieldLabel}"
+                   HorizontalTextAlignment="Start" />
 
-        <VerticalStackLayout Grid.Row="1" Padding="16" Spacing="10" BackgroundColor="{AppThemeBinding Light=White, Dark=#1B1B1B}">
-            <Label Text="{Binding Status}" HorizontalTextAlignment="Center" />
+            <Border Style="{StaticResource InputWrap}" Padding="12,4">
+                <Editor Text="{Binding InviteJson, Mode=TwoWay}"
+                        Placeholder='{&quot;V&quot;:&quot;1&quot;,&quot;FamilyId&quot;:&quot;…&quot;, …}'
+                        HeightRequest="140"
+                        AutoSize="TextChanges" />
+            </Border>
 
-            <Border IsVisible="{Binding SasVisible}" Style="{StaticResource Card}" Padding="16">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                <Button Grid.Column="0" Text="Вставить из буфера" Style="{StaticResource Secondary}" Command="{Binding PasteCommand}" />
+                <Button Grid.Column="1" Text="Подключиться" Command="{Binding ConnectCommand}" />
+            </Grid>
+
+            <Label Text="{Binding Status}" FontSize="13" HorizontalTextAlignment="Center" />
+
+            <Border IsVisible="{Binding SasVisible}" Style="{StaticResource Card}" Padding="16" Margin="0,12,0,0">
                 <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
                     <Label Text="Код подтверждения" Style="{StaticResource FieldLabel}" HorizontalOptions="Center" />
                     <Label Text="{Binding Sas}"
@@ -28,12 +39,16 @@
                     <Label Text="{Binding PeerDisplayName, StringFormat='Устройство: {0}'}"
                            Style="{StaticResource FieldLabel}"
                            HorizontalOptions="Center" />
+                    <Label Text="Сверьте код с кодом на первом устройстве и подтвердите"
+                           Style="{StaticResource FieldLabel}"
+                           HorizontalTextAlignment="Center" />
                     <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
                         <Button Grid.Column="0" Text="Отмена" Style="{StaticResource Secondary}" Command="{Binding CancelCommand}" />
                         <Button Grid.Column="1" Text="Коды совпадают" Command="{Binding ConfirmSasCommand}" />
                     </Grid>
                 </VerticalStackLayout>
             </Border>
+
         </VerticalStackLayout>
-    </Grid>
+    </ScrollView>
 </ContentPage>

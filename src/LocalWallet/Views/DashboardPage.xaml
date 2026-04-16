@@ -9,15 +9,20 @@
     <Grid RowDefinitions="Auto,*" Padding="16" RowSpacing="12">
 
         <Border Grid.Row="0"
-                BackgroundColor="{StaticResource Primary}"
-                StrokeShape="RoundRectangle 12"
+                StrokeShape="RoundRectangle 18"
                 Stroke="Transparent"
-                Padding="20">
-            <VerticalStackLayout Spacing="6">
-                <Label Text="Общий баланс" TextColor="White" FontSize="14" />
-                <Label FontSize="34" TextColor="White" FontAttributes="Bold">
+                Padding="22">
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Offset="0" Color="#2E7D32" />
+                    <GradientStop Offset="1" Color="#1B5E20" />
+                </LinearGradientBrush>
+            </Border.Background>
+            <VerticalStackLayout Spacing="8">
+                <Label Text="Общий баланс" TextColor="#CCFFFFFF" FontSize="13" />
+                <Label FontSize="36" TextColor="White" FontAttributes="Bold">
                     <Label.Text>
-                        <MultiBinding StringFormat="{}{0:0.00} {1}">
+                        <MultiBinding StringFormat="{}{0:N2} {1}">
                             <Binding Path="TotalBalance" />
                             <Binding Path="BaseCurrency" />
                         </MultiBinding>

@@ -22,7 +22,21 @@ public partial class AddTransactionViewModel : BaseViewModel
     [ObservableProperty] private decimal amount;
     [ObservableProperty] private DateTime date = DateTime.Now;
     [ObservableProperty] private string? note;
-    [ObservableProperty] private bool isExpense = true;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ExpenseBg))]
+    [NotifyPropertyChangedFor(nameof(ExpenseText))]
+    [NotifyPropertyChangedFor(nameof(IncomeBg))]
+    [NotifyPropertyChangedFor(nameof(IncomeText))]
+    private bool isExpense = true;
+
+    public Color ExpenseBg => IsExpense ? Color.FromArgb("#D32F2F") : Colors.Transparent;
+    public Color ExpenseText => IsExpense ? Colors.White : Color.FromArgb("#D32F2F");
+    public Color IncomeBg => !IsExpense ? Color.FromArgb("#2E7D32") : Colors.Transparent;
+    public Color IncomeText => !IsExpense ? Colors.White : Color.FromArgb("#2E7D32");
+
+    [RelayCommand] private void SetExpense() => IsExpense = true;
+    [RelayCommand] private void SetIncome() => IsExpense = false;
 
     public AddTransactionViewModel(IDatabaseService db, IExchangeRateService rates)
     {

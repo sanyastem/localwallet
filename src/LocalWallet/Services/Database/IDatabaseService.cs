@@ -35,6 +35,10 @@ public interface IDatabaseService
     Task<AppSettings> GetSettingsAsync();
     Task SaveSettingsAsync(AppSettings settings);
 
+    // Device identity
+    Task<DeviceIdentity?> GetDeviceIdentityAsync();
+    Task SaveDeviceIdentityAsync(DeviceIdentity identity);
+
     // Admin
     Task ResetAllDataAsync();
 }

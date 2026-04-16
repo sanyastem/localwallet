@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LocalWallet.Models;
 using LocalWallet.Services;
+using LocalWallet.Services.Crypto;
 using LocalWallet.Services.Database;
 using LocalWallet.Services.ExchangeRates;
 using LocalWallet.ViewModels.Base;
@@ -17,6 +18,7 @@ public partial class SettingsViewModel : BaseViewModel
     private readonly IBiometricService _biometric;
     private readonly IExportService _export;
     private readonly IExchangeRateService _rates;
+    private readonly IDeviceIdentityService _identity;
 
     [ObservableProperty] private ObservableCollection<CurrencyInfo> availableCurrencies = new();
     [ObservableProperty] private ObservableCollection<CurrencyChoice> displayChoices = new();
@@ -26,19 +28,23 @@ public partial class SettingsViewModel : BaseViewModel
     [ObservableProperty] private DateTime deleteFromDate = DateTime.Today.AddMonths(-1);
     [ObservableProperty] private DateTime deleteToDate = DateTime.Today;
     [ObservableProperty] private string lastRatesUpdateText = "никогда";
+    [ObservableProperty] private string deviceDisplayName = "Моё устройство";
+    [ObservableProperty] private string deviceIdShort = string.Empty;
 
     public SettingsViewModel(
         IDatabaseService db,
         ISettingsService settings,
         IBiometricService biometric,
         IExportService export,
-        IExchangeRateService rates)
+        IExchangeRateService rates,
+        IDeviceIdentityService identity)
     {
         _db = db;
         _settings = settings;
         _biometric = biometric;
         _export = export;
         _rates = rates;
+        _identity = identity;
         Title = "Настройки";
     }
 
@@ -69,6 +75,18 @@ public partial class SettingsViewModel : BaseViewModel
         BiometricAvailable = await _biometric.IsAvailableAsync();
         BiometricEnabled = s.BiometricEnabled && BiometricAvailable;
         LastRatesUpdateText = s.LastRatesUpdate?.ToLocalTime().ToString("yyyy-MM-dd HH:mm") ?? "никогда";
+
+        try { await _identity.InitializeAsync(); } catch { }
+        DeviceDisplayName = _identity.DisplayName;
+        DeviceIdShort = _identity.DeviceId.Length > 12 ? _identity.DeviceId[..12] + "…" : _identity.DeviceId;
+    }
+
+    [RelayCommand]
+    private async Task SaveDeviceNameAsync()
+    {
+        await _identity.SetDisplayNameAsync(DeviceDisplayName);
+        if (Application.Current?.MainPage is not null)
+            await Application.Current.MainPage.DisplayAlert("Устройство", "Имя сохранено.", "OK");
     }
 
     [RelayCommand]

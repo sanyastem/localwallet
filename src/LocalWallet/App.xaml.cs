@@ -1,3 +1,4 @@
+using LocalWallet.Services.Crypto;
 using LocalWallet.Services.Database;
 using LocalWallet.Services.ExchangeRates;
 using LocalWallet.Views;
@@ -30,6 +31,9 @@ public partial class App : Application
         {
             var db = _services.GetRequiredService<IDatabaseService>();
             var settings = await db.GetSettingsAsync();
+
+            try { await _services.GetRequiredService<IDeviceIdentityService>().InitializeAsync(); }
+            catch { /* device identity is best-effort; P2P features will gracefully fail later */ }
 
             await MainThread.InvokeOnMainThreadAsync(() =>
             {

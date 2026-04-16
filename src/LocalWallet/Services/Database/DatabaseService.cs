@@ -35,6 +35,7 @@ public class DatabaseService : IDatabaseService
         await _db.CreateTableAsync<Transaction>();
         await _db.CreateTableAsync<ExchangeRate>();
         await _db.CreateTableAsync<AppSettings>();
+        await _db.CreateTableAsync<DeviceIdentity>();
 
         var settings = await _db.FindAsync<AppSettings>(1);
         if (settings is null)
@@ -249,6 +250,21 @@ public class DatabaseService : IDatabaseService
         await db.InsertOrReplaceAsync(settings);
     }
 
+    // --- Device identity ---
+
+    public async Task<DeviceIdentity?> GetDeviceIdentityAsync()
+    {
+        var db = await GetConnectionAsync();
+        return await db.FindAsync<DeviceIdentity>(1);
+    }
+
+    public async Task SaveDeviceIdentityAsync(DeviceIdentity identity)
+    {
+        var db = await GetConnectionAsync();
+        identity.Id = 1;
+        await db.InsertOrReplaceAsync(identity);
+    }
+
     public async Task ResetAllDataAsync()
     {
         var db = await GetConnectionAsync();
@@ -257,6 +273,8 @@ public class DatabaseService : IDatabaseService
         await db.DeleteAllAsync<Category>();
         await db.DeleteAllAsync<ExchangeRate>();
         await db.DeleteAllAsync<AppSettings>();
+        // Intentionally keep DeviceIdentity: device keypair is tied to SecureStorage
+        // and regenerating on reset would orphan any family memberships.
         await db.InsertAsync(new AppSettings());
         await SeedDefaultCategoriesAsync(db);
     }

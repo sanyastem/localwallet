@@ -30,13 +30,15 @@ jobs:
         id: ver
         shell: bash
         run: |
+          set +o pipefail
           IN="${{ github.event.inputs.release_version }}"
           if [ -n "$IN" ]; then
             V="$IN"
           else
             MSG=$(git log -1 --pretty=%s)
-            V=$(echo "$MSG" | grep -oE 'Release v[0-9]+\.[0-9]+\.[0-9]+' | head -1 | sed 's/Release v//')
+            V=$(echo "$MSG" | grep -oE 'Release v[0-9]+\.[0-9]+\.[0-9]+' | head -1 | sed 's/Release v//' || true)
           fi
+          V="${V:-}"
           echo "version=$V" >> "$GITHUB_OUTPUT"
           if [ -n "$V" ]; then
             echo "Will publish release: v$V"

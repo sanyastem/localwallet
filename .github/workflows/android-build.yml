@@ -1,0 +1,50 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Install MAUI workload
+        run: dotnet workload install maui-android
+
+      - name: Restore
+        run: dotnet restore src/LocalWallet/LocalWallet.csproj
+
+      - name: Publish Android APK (Release)
+        run: >
+          dotnet publish src/LocalWallet/LocalWallet.csproj
+          -f net10.0-android
+          -c Release
+          -p:AndroidPackageFormat=apk
+          -o ./artifacts
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: LocalWallet-apk
+          path: ./artifacts/*-Signed.apk
+          if-no-files-found: warn
+          retention-days: 90

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:LocalWallet.ViewModels"
+             xmlns:microcharts="clr-namespace:Microcharts.Maui;assembly=Microcharts.Maui"
+             x:Class="LocalWallet.Views.StatisticsPage"
+             x:DataType="vm:StatisticsViewModel"
+             Title="Статистика">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="12">
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                <VerticalStackLayout Grid.Column="0">
+                    <Label Text="С" FontSize="12" TextColor="{StaticResource Gray500}" />
+                    <DatePicker Date="{Binding FromDate, Mode=TwoWay}" />
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Column="1">
+                    <Label Text="По" FontSize="12" TextColor="{StaticResource Gray500}" />
+                    <DatePicker Date="{Binding ToDate, Mode=TwoWay}" />
+                </VerticalStackLayout>
+            </Grid>
+
+            <Button Text="Применить"
+                    Command="{Binding LoadCommand}"
+                    BackgroundColor="{StaticResource Primary}"
+                    TextColor="White" />
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                <Border Grid.Column="0" StrokeShape="RoundRectangle 10" Stroke="{StaticResource Gray300}" Padding="12">
+                    <VerticalStackLayout>
+                        <Label Text="Доход" FontSize="12" TextColor="SeaGreen" />
+                        <Label FontSize="18" FontAttributes="Bold">
+                            <Label.Text>
+                                <MultiBinding StringFormat="{}{0:0.00} {1}">
+                                    <Binding Path="TotalIncome" />
+                                    <Binding Path="BaseCurrency" />
+                                </MultiBinding>
+                            </Label.Text>
+                        </Label>
+                    </VerticalStackLayout>
+                </Border>
+                <Border Grid.Column="1" StrokeShape="RoundRectangle 10" Stroke="{StaticResource Gray300}" Padding="12">
+                    <VerticalStackLayout>
+                        <Label Text="Расход" FontSize="12" TextColor="#D32F2F" />
+                        <Label FontSize="18" FontAttributes="Bold">
+                            <Label.Text>
+                                <MultiBinding StringFormat="{}{0:0.00} {1}">
+                                    <Binding Path="TotalExpenses" />
+                                    <Binding Path="BaseCurrency" />
+                                </MultiBinding>
+                            </Label.Text>
+                        </Label>
+                    </VerticalStackLayout>
+                </Border>
+            </Grid>
+
+            <microcharts:ChartView Chart="{Binding ExpensesChart}" HeightRequest="280" />
+
+            <Label Text="По категориям" FontSize="16" FontAttributes="Bold" />
+            <CollectionView ItemsSource="{Binding CategoryStats}" HeightRequest="260">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="vm:CategoryStat">
+                        <Grid Padding="10" ColumnDefinitions="20,*,Auto" ColumnSpacing="10">
+                            <BoxView Grid.Column="0" Color="{Binding ColorHex}" WidthRequest="12" HeightRequest="12" VerticalOptions="Center" />
+                            <Label Grid.Column="1" Text="{Binding Name}" VerticalOptions="Center" />
+                            <Label Grid.Column="2" Text="{Binding AmountFormatted}" FontAttributes="Bold" VerticalOptions="Center" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

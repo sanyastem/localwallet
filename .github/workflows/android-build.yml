@@ -3,9 +3,13 @@ name: Build Android APK
 on:
   push:
     branches: [master, main]
+    tags: ['v*']
   pull_request:
     branches: [master, main]
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -41,6 +45,13 @@ jobs:
           -p:AndroidPackageFormat=apk
           -o ./artifacts
 
+      - name: Rename APK for release
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          mkdir -p ./release
+          cp ./artifacts/*-Signed.apk "./release/LocalWallet-${GITHUB_REF_NAME}.apk"
+          ls -la ./release
+
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
@@ -48,3 +59,12 @@ jobs:
           path: ./artifacts/*-Signed.apk
           if-no-files-found: warn
           retention-days: 90
+
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ./release/*.apk
+          generate_release_notes: true
+          draft: false
+          prerelease: false

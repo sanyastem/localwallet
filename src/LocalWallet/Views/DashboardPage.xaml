@@ -11,6 +11,7 @@
         <Border Grid.Row="0"
                 BackgroundColor="{StaticResource Primary}"
                 StrokeShape="RoundRectangle 12"
+                Stroke="Transparent"
                 Padding="20">
             <VerticalStackLayout Spacing="6">
                 <Label Text="Общий баланс" TextColor="White" FontSize="14" />
@@ -26,16 +27,40 @@
         </Border>
 
         <Grid Grid.Row="1" RowDefinitions="Auto,*" RowSpacing="8">
-            <Label Grid.Row="0" Text="Последние операции" FontSize="18" FontAttributes="Bold" />
+            <Label Grid.Row="0"
+                   Text="Последние операции"
+                   FontSize="18" FontAttributes="Bold"
+                   IsVisible="{Binding HasAccounts}" />
 
             <RefreshView Grid.Row="1"
                          IsRefreshing="{Binding IsBusy}"
                          Command="{Binding LoadCommand}">
-                <CollectionView ItemsSource="{Binding RecentTransactions}">
+                <CollectionView ItemsSource="{Binding RecentTransactions}"
+                                SelectionMode="None">
                     <CollectionView.EmptyView>
-                        <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="8">
-                            <Label Text="Пока нет операций" FontSize="16" TextColor="{StaticResource Gray500}" />
-                            <Label Text="Нажмите +, чтобы добавить первую" TextColor="{StaticResource Gray500}" />
+                        <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="12" Padding="24">
+                            <Label Text="Добро пожаловать"
+                                   FontSize="22" FontAttributes="Bold"
+                                   HorizontalOptions="Center"
+                                   IsVisible="{Binding HasAccounts, Converter={StaticResource InverseBool}}" />
+                            <Label Text="Создайте первый счёт, чтобы начать вести учёт"
+                                   TextColor="{StaticResource Gray500}"
+                                   HorizontalTextAlignment="Center"
+                                   IsVisible="{Binding HasAccounts, Converter={StaticResource InverseBool}}" />
+                            <Button Text="Создать счёт"
+                                    Command="{Binding CreateAccountCommand}"
+                                    BackgroundColor="{StaticResource Primary}"
+                                    TextColor="White"
+                                    IsVisible="{Binding HasAccounts, Converter={StaticResource InverseBool}}" />
+
+                            <Label Text="Пока нет операций"
+                                   FontSize="16" TextColor="{StaticResource Gray500}"
+                                   HorizontalOptions="Center"
+                                   IsVisible="{Binding HasAccounts}" />
+                            <Label Text="Нажмите +, чтобы добавить первую"
+                                   FontSize="13" TextColor="{StaticResource Gray500}"
+                                   HorizontalOptions="Center"
+                                   IsVisible="{Binding HasAccounts}" />
                         </VerticalStackLayout>
                     </CollectionView.EmptyView>
                     <CollectionView.ItemTemplate>
@@ -69,11 +94,13 @@
                 FontSize="28"
                 WidthRequest="60" HeightRequest="60"
                 CornerRadius="30"
+                Padding="0"
                 HorizontalOptions="End"
                 VerticalOptions="End"
                 Margin="0,0,8,16"
                 BackgroundColor="{StaticResource Primary}"
                 TextColor="White"
+                IsVisible="{Binding HasAccounts}"
                 Command="{Binding AddTransactionCommand}" />
 
     </Grid>

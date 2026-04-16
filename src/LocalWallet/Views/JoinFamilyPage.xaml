@@ -2,7 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:LocalWallet.ViewModels"
-             xmlns:zx="clr-namespace:ZXing.Net.Maui.Controls;assembly=ZXing.Net.Maui.Controls"
+             xmlns:zx="clr-namespace:ZXing.Net.Maui.Controls;assembly=ZXing.Net.Maui"
              x:Class="LocalWallet.Views.JoinFamilyPage"
              x:DataType="vm:JoinFamilyViewModel"
              Title="Присоединиться">

@@ -97,24 +97,33 @@ jobs:
           path: /tmp/publish.log
           retention-days: 7
 
+      - name: Emit build errors as annotations
+        if: always() && steps.publish.outcome == 'failure'
+        shell: bash
+        run: |
+          if [ ! -f /tmp/publish.log ]; then exit 0; fi
+          grep -nE 'error [A-Z]+[0-9]+|: error|FAILED|error MSB|error XA|error XAMLC|error XLS|error NU' /tmp/publish.log | head -40 | while IFS= read -r line; do
+            safe=$(printf '%s' "$line" | sed 's/%/%25/g; s/\r//g' | tr '\n' ' ')
+            echo "::error::$safe"
+          done
+
       - name: Push build log to ci-log branch (on failure)
         if: always() && steps.publish.outcome == 'failure'
         shell: bash
         run: |
-          set +e
-          git config user.name "ci"
-          git config user.email "ci@localwallet.local"
+          set -x
+          git config --global user.name "ci"
+          git config --global user.email "ci@localwallet.local"
           WORK=$(mktemp -d)
           cd "$WORK"
-          git init -q
-          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
-          git checkout --orphan ci-log
-          cp /tmp/publish.log latest.txt || echo "no log" > latest.txt
+          git init -q -b ci-log
+          cp /tmp/publish.log latest.txt 2>/dev/null || echo "no log" > latest.txt
           echo "$GITHUB_SHA" > sha.txt
           git add -A
-          git commit -q -m "CI log for $GITHUB_SHA"
-          git push -f origin ci-log
-          echo "Pushed CI log. Inspect with: https://raw.githubusercontent.com/${{ github.repository }}/ci-log/latest.txt"
+          git commit -q -m "CI log for $GITHUB_SHA" || { echo "nothing to commit"; exit 0; }
+          REMOTE="https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git push -f "$REMOTE" ci-log:ci-log
+          echo "Pushed to ci-log. URL: https://raw.githubusercontent.com/${{ github.repository }}/ci-log/latest.txt"
 
       - name: Fail if publish failed
         if: steps.publish.outcome == 'failure'

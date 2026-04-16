@@ -62,12 +62,42 @@ jobs:
         run: dotnet restore src/LocalWallet/LocalWallet.csproj
 
       - name: Publish Android APK (Release)
-        run: >
-          dotnet publish src/LocalWallet/LocalWallet.csproj
-          -f net10.0-android
-          -c Release
-          -p:AndroidPackageFormat=apk
-          -o ./artifacts
+        id: publish
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -o pipefail
+          dotnet publish src/LocalWallet/LocalWallet.csproj \
+            -f net10.0-android \
+            -c Release \
+            -p:AndroidPackageFormat=apk \
+            -o ./artifacts 2>&1 | tee /tmp/publish.log
+
+      - name: Surface build errors
+        if: always()
+        shell: bash
+        run: |
+          echo "## Publish step output" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          if [ -f /tmp/publish.log ]; then
+            grep -nE 'error [A-Z]+[0-9]+|: error|FAILED|Unhandled exception|Build FAILED|XLS[0-9]+|Fatal' /tmp/publish.log | head -120 >> "$GITHUB_STEP_SUMMARY" || true
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "--- tail ---" >> "$GITHUB_STEP_SUMMARY"
+            tail -150 /tmp/publish.log >> "$GITHUB_STEP_SUMMARY"
+          fi
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload full build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: /tmp/publish.log
+          retention-days: 7
+
+      - name: Fail if publish failed
+        if: steps.publish.outcome == 'failure'
+        run: exit 1
 
       - name: Prepare release file
         if: steps.ver.outputs.version != ''

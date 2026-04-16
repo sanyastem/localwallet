@@ -9,19 +9,39 @@
     <TabBar>
         <ShellContent Title="Главная"
                       ContentTemplate="{DataTemplate views:DashboardPage}"
-                      Route="dashboard" />
+                      Route="dashboard">
+            <ShellContent.Icon>
+                <FontImageSource FontFamily="MatIcon" Glyph="&#xe88a;" />
+            </ShellContent.Icon>
+        </ShellContent>
         <ShellContent Title="Операции"
                       ContentTemplate="{DataTemplate views:TransactionsPage}"
-                      Route="transactions" />
+                      Route="transactions">
+            <ShellContent.Icon>
+                <FontImageSource FontFamily="MatIcon" Glyph="&#xe8b0;" />
+            </ShellContent.Icon>
+        </ShellContent>
         <ShellContent Title="Валюты"
                       ContentTemplate="{DataTemplate views:MultiCurrencyPage}"
-                      Route="multicurrency" />
+                      Route="multicurrency">
+            <ShellContent.Icon>
+                <FontImageSource FontFamily="MatIcon" Glyph="&#xe8d4;" />
+            </ShellContent.Icon>
+        </ShellContent>
         <ShellContent Title="Статистика"
                       ContentTemplate="{DataTemplate views:StatisticsPage}"
-                      Route="statistics" />
+                      Route="statistics">
+            <ShellContent.Icon>
+                <FontImageSource FontFamily="MatIcon" Glyph="&#xe6c4;" />
+            </ShellContent.Icon>
+        </ShellContent>
         <ShellContent Title="Настройки"
                       ContentTemplate="{DataTemplate views:SettingsPage}"
-                      Route="settings" />
+                      Route="settings">
+            <ShellContent.Icon>
+                <FontImageSource FontFamily="MatIcon" Glyph="&#xe8b8;" />
+            </ShellContent.Icon>
+        </ShellContent>
     </TabBar>
 
 </Shell>

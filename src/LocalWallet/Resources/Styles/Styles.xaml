@@ -14,8 +14,10 @@
         <Setter Property="TextColor" Value="White" />
         <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
         <Setter Property="FontSize" Value="14" />
-        <Setter Property="CornerRadius" Value="8" />
-        <Setter Property="Padding" Value="14,10" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="Padding" Value="16,14" />
+        <Setter Property="MinimumHeightRequest" Value="48" />
     </Style>
 
     <Style TargetType="Entry">
@@ -27,6 +29,13 @@
         <Setter Property="FontSize" Value="15" />
     </Style>
 
+    <Style TargetType="Border" x:Key="Card">
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource Gray200}, Dark=#2A2A2A}" />
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light=White, Dark=#1E1E1E}" />
+        <Setter Property="StrokeShape" Value="RoundRectangle 12" />
+        <Setter Property="Padding" Value="16" />
+    </Style>
+
     <Style TargetType="Shell" ApplyToDerivedTypes="True">
         <Setter Property="Shell.BackgroundColor" Value="{StaticResource Primary}" />
         <Setter Property="Shell.ForegroundColor" Value="White" />
@@ -34,7 +43,7 @@
         <Setter Property="Shell.DisabledColor" Value="{StaticResource Gray300}" />
         <Setter Property="Shell.UnselectedColor" Value="#B0D7B2" />
         <Setter Property="Shell.NavBarHasShadow" Value="False" />
-        <Setter Property="Shell.TabBarBackgroundColor" Value="White" />
+        <Setter Property="Shell.TabBarBackgroundColor" Value="{AppThemeBinding Light=White, Dark=#1A1A1A}" />
         <Setter Property="Shell.TabBarForegroundColor" Value="{StaticResource Primary}" />
         <Setter Property="Shell.TabBarTitleColor" Value="{StaticResource Primary}" />
         <Setter Property="Shell.TabBarUnselectedColor" Value="{StaticResource Gray500}" />

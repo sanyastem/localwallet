@@ -11,8 +11,8 @@
 
 		<ApplicationTitle>LocalWallet</ApplicationTitle>
 		<ApplicationId>com.sanyastem.localwallet</ApplicationId>
-		<ApplicationDisplayVersion>1.0.0</ApplicationDisplayVersion>
-		<ApplicationVersion>1</ApplicationVersion>
+		<ApplicationDisplayVersion>1.1.0</ApplicationDisplayVersion>
+		<ApplicationVersion>2</ApplicationVersion>
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">24.0</SupportedOSPlatformVersion>
 	</PropertyGroup>
@@ -20,6 +20,7 @@
 	<ItemGroup>
 		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#2E7D32" />
 		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#2E7D32" BaseSize="128,128" />
+		<MauiFont Include="Resources\Fonts\*" />
 	</ItemGroup>
 
 	<ItemGroup>

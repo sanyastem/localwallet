@@ -17,6 +17,7 @@ public partial class DashboardViewModel : BaseViewModel
     [ObservableProperty] private decimal totalBalance;
     [ObservableProperty] private string baseCurrency = "PLN";
     [ObservableProperty] private ObservableCollection<TransactionDisplay> recentTransactions = new();
+    [ObservableProperty] private bool hasAccounts;
 
     public DashboardViewModel(IDatabaseService db, IExchangeRateService rates)
     {
@@ -37,6 +38,7 @@ public partial class DashboardViewModel : BaseViewModel
 
             var accounts = await _db.GetAccountsAsync();
             var transactions = await _db.GetTransactionsAsync();
+            HasAccounts = accounts.Count > 0;
 
             decimal total = 0;
             foreach (var acc in accounts)
@@ -84,6 +86,12 @@ public partial class DashboardViewModel : BaseViewModel
     private async Task AddTransactionAsync()
     {
         await Shell.Current.GoToAsync(nameof(AddTransactionPage));
+    }
+
+    [RelayCommand]
+    private async Task CreateAccountAsync()
+    {
+        await Shell.Current.GoToAsync(nameof(AccountsPage));
     }
 }
 

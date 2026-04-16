@@ -27,7 +27,7 @@
                     TextColor="White" />
 
             <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
-                <Border Grid.Column="0" StrokeShape="RoundRectangle 10" Stroke="{StaticResource Gray300}" Padding="12">
+                <Border Grid.Column="0" Style="{StaticResource Card}" Padding="12">
                     <VerticalStackLayout>
                         <Label Text="Доход" FontSize="12" TextColor="SeaGreen" />
                         <Label FontSize="18" FontAttributes="Bold">
@@ -40,7 +40,7 @@
                         </Label>
                     </VerticalStackLayout>
                 </Border>
-                <Border Grid.Column="1" StrokeShape="RoundRectangle 10" Stroke="{StaticResource Gray300}" Padding="12">
+                <Border Grid.Column="1" Style="{StaticResource Card}" Padding="12">
                     <VerticalStackLayout>
                         <Label Text="Расход" FontSize="12" TextColor="#D32F2F" />
                         <Label FontSize="18" FontAttributes="Bold">

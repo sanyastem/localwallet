@@ -36,6 +36,9 @@ public class DatabaseService : IDatabaseService
         await _db.CreateTableAsync<ExchangeRate>();
         await _db.CreateTableAsync<AppSettings>();
         await _db.CreateTableAsync<DeviceIdentity>();
+        await _db.CreateTableAsync<Family>();
+        await _db.CreateTableAsync<FamilyMember>();
+        await _db.CreateTableAsync<SyncEvent>();
 
         var settings = await _db.FindAsync<AppSettings>(1);
         if (settings is null)
@@ -263,6 +266,108 @@ public class DatabaseService : IDatabaseService
         var db = await GetConnectionAsync();
         identity.Id = 1;
         await db.InsertOrReplaceAsync(identity);
+    }
+
+    // --- Families ---
+
+    public async Task<List<Family>> GetFamiliesAsync()
+    {
+        var db = await GetConnectionAsync();
+        return await db.Table<Family>().Where(f => !f.IsDeleted).ToListAsync();
+    }
+
+    public async Task<Family?> GetFamilyAsync(Guid id)
+    {
+        var db = await GetConnectionAsync();
+        return await db.FindAsync<Family>(id);
+    }
+
+    public async Task SaveFamilyAsync(Family family)
+    {
+        var db = await GetConnectionAsync();
+        await db.InsertOrReplaceAsync(family);
+    }
+
+    public async Task DeleteFamilyAsync(Guid id)
+    {
+        var db = await GetConnectionAsync();
+        var f = await db.FindAsync<Family>(id);
+        if (f is null) return;
+        f.IsDeleted = true;
+        await db.UpdateAsync(f);
+    }
+
+    public async Task<List<FamilyMember>> GetFamilyMembersAsync(Guid familyId)
+    {
+        var db = await GetConnectionAsync();
+        return await db.Table<FamilyMember>()
+            .Where(m => m.FamilyId == familyId && m.RevokedAt == null)
+            .ToListAsync();
+    }
+
+    public async Task SaveFamilyMemberAsync(FamilyMember member)
+    {
+        var db = await GetConnectionAsync();
+        var existing = await db.FindAsync<FamilyMember>(member.Id);
+        if (existing is null) await db.InsertAsync(member);
+        else await db.UpdateAsync(member);
+    }
+
+    public async Task<FamilyMember?> FindFamilyMemberAsync(Guid familyId, string deviceId)
+    {
+        var db = await GetConnectionAsync();
+        return await db.Table<FamilyMember>()
+            .Where(m => m.FamilyId == familyId && m.DeviceId == deviceId)
+            .FirstOrDefaultAsync();
+    }
+
+    // --- Sync events ---
+
+    public async Task<List<SyncEvent>> GetEventsSinceAsync(Guid familyId, string deviceId, long sinceClock)
+    {
+        var db = await GetConnectionAsync();
+        return await db.Table<SyncEvent>()
+            .Where(e => e.FamilyId == familyId && e.AuthorDeviceId == deviceId && e.LamportClock > sinceClock)
+            .OrderBy(e => e.LamportClock)
+            .ToListAsync();
+    }
+
+    public async Task<long> GetMaxClockForDeviceAsync(Guid familyId, string deviceId)
+    {
+        var db = await GetConnectionAsync();
+        var latest = await db.Table<SyncEvent>()
+            .Where(e => e.FamilyId == familyId && e.AuthorDeviceId == deviceId)
+            .OrderByDescending(e => e.LamportClock)
+            .FirstOrDefaultAsync();
+        return latest?.LamportClock ?? 0;
+    }
+
+    public async Task<List<(string DeviceId, long MaxClock)>> GetVectorClockAsync(Guid familyId)
+    {
+        var db = await GetConnectionAsync();
+        var rows = await db.QueryAsync<VectorRow>(
+            "SELECT AuthorDeviceId AS DeviceId, MAX(LamportClock) AS MaxClock FROM SyncEvents WHERE FamilyId = ? GROUP BY AuthorDeviceId",
+            familyId);
+        return rows.Select(r => (r.DeviceId, r.MaxClock)).ToList();
+    }
+
+    private class VectorRow
+    {
+        public string DeviceId { get; set; } = string.Empty;
+        public long MaxClock { get; set; }
+    }
+
+    public async Task AppendEventAsync(SyncEvent ev)
+    {
+        var db = await GetConnectionAsync();
+        await db.InsertOrReplaceAsync(ev);
+    }
+
+    public async Task<bool> EventExistsAsync(Guid eventId)
+    {
+        var db = await GetConnectionAsync();
+        var e = await db.FindAsync<SyncEvent>(eventId);
+        return e is not null;
     }
 
     public async Task ResetAllDataAsync()

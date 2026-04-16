@@ -39,6 +39,24 @@ public interface IDatabaseService
     Task<DeviceIdentity?> GetDeviceIdentityAsync();
     Task SaveDeviceIdentityAsync(DeviceIdentity identity);
 
+    // Families
+    Task<List<Family>> GetFamiliesAsync();
+    Task<Family?> GetFamilyAsync(Guid id);
+    Task SaveFamilyAsync(Family family);
+    Task DeleteFamilyAsync(Guid id);
+
+    // Family members
+    Task<List<FamilyMember>> GetFamilyMembersAsync(Guid familyId);
+    Task SaveFamilyMemberAsync(FamilyMember member);
+    Task<FamilyMember?> FindFamilyMemberAsync(Guid familyId, string deviceId);
+
+    // Sync events
+    Task<List<SyncEvent>> GetEventsSinceAsync(Guid familyId, string deviceId, long sinceClock);
+    Task<long> GetMaxClockForDeviceAsync(Guid familyId, string deviceId);
+    Task<List<(string DeviceId, long MaxClock)>> GetVectorClockAsync(Guid familyId);
+    Task AppendEventAsync(SyncEvent ev);
+    Task<bool> EventExistsAsync(Guid eventId);
+
     // Admin
     Task ResetAllDataAsync();
 }

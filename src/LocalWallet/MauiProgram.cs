@@ -2,10 +2,13 @@ using LocalWallet.Services;
 using LocalWallet.Services.Crypto;
 using LocalWallet.Services.Database;
 using LocalWallet.Services.ExchangeRates;
+using LocalWallet.Services.Family;
+using LocalWallet.Services.Sync;
 using LocalWallet.ViewModels;
 using LocalWallet.Views;
 using Microcharts.Maui;
 using Microsoft.Extensions.Logging;
+using ZXing.Net.Maui.Controls;
 
 namespace LocalWallet;
 
@@ -17,6 +20,7 @@ public static class MauiProgram
         builder
             .UseMauiApp<App>()
             .UseMicrocharts()
+            .UseBarcodeReader()
             .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("MaterialIcons-Regular.ttf", "MatIcon");
@@ -26,7 +30,7 @@ public static class MauiProgram
         builder.Logging.AddDebug();
 #endif
 
-        // Services
+        // Core services
         builder.Services.AddSingleton<IDatabaseService, DatabaseService>();
         builder.Services.AddSingleton<ISettingsService, SettingsService>();
         builder.Services.AddSingleton<IBiometricService, BiometricService>();
@@ -35,8 +39,17 @@ public static class MauiProgram
         builder.Services.AddSingleton<NbpRatesProvider>();
         builder.Services.AddSingleton<FrankfurterRatesProvider>();
         builder.Services.AddSingleton<IExchangeRateService, ExchangeRateService>();
+
+        // Crypto / identity
         builder.Services.AddSingleton<IDeviceIdentityService, DeviceIdentityService>();
         builder.Services.AddSingleton<IFamilyCryptoService, FamilyCryptoService>();
+        builder.Services.AddSingleton<IPairingService, PairingService>();
+
+        // Family + sync
+        builder.Services.AddSingleton<IFamilyService, FamilyService>();
+        builder.Services.AddSingleton<IProjector, Projector>();
+        builder.Services.AddSingleton<IEventStore, EventStore>();
+        builder.Services.AddSingleton<ISyncService, SyncService>();
 
         // ViewModels
         builder.Services.AddTransient<DashboardViewModel>();
@@ -48,6 +61,10 @@ public static class MauiProgram
         builder.Services.AddTransient<StatisticsViewModel>();
         builder.Services.AddTransient<SettingsViewModel>();
         builder.Services.AddTransient<OnboardingViewModel>();
+        builder.Services.AddTransient<FamilyListViewModel>();
+        builder.Services.AddTransient<FamilyDetailsViewModel>();
+        builder.Services.AddTransient<InviteViewModel>();
+        builder.Services.AddTransient<JoinFamilyViewModel>();
 
         // Pages
         builder.Services.AddTransient<LockPage>();
@@ -60,6 +77,10 @@ public static class MauiProgram
         builder.Services.AddTransient<StatisticsPage>();
         builder.Services.AddTransient<SettingsPage>();
         builder.Services.AddTransient<OnboardingPage>();
+        builder.Services.AddTransient<FamilyListPage>();
+        builder.Services.AddTransient<FamilyDetailsPage>();
+        builder.Services.AddTransient<InvitePage>();
+        builder.Services.AddTransient<JoinFamilyPage>();
 
         return builder.Build();
     }

@@ -16,9 +16,8 @@
 
             <Border Style="{StaticResource InputWrap}" Padding="12,4">
                 <Editor Text="{Binding InviteJson, Mode=TwoWay}"
-                        Placeholder='{&quot;V&quot;:&quot;1&quot;,&quot;FamilyId&quot;:&quot;…&quot;, …}'
-                        HeightRequest="140"
-                        AutoSize="TextChanges" />
+                        Placeholder="JSON приглашения"
+                        HeightRequest="140" />
             </Border>
 
             <Grid ColumnDefinitions="*,*" ColumnSpacing="8">

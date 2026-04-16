@@ -18,5 +18,7 @@ public class AppSettings
 
     public DateTime? LastRatesUpdate { get; set; }
 
+    public bool IsOnboarded { get; set; }
+
     public long CurrentLamportClock { get; set; }
 }

@@ -29,6 +29,19 @@
         <Setter Property="FontSize" Value="15" />
     </Style>
 
+    <Style TargetType="Button" x:Key="Fab">
+        <Setter Property="WidthRequest" Value="60" />
+        <Setter Property="HeightRequest" Value="60" />
+        <Setter Property="MinimumHeightRequest" Value="60" />
+        <Setter Property="MinimumWidthRequest" Value="60" />
+        <Setter Property="CornerRadius" Value="30" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="FontSize" Value="30" />
+        <Setter Property="FontAttributes" Value="None" />
+        <Setter Property="TextColor" Value="White" />
+        <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+    </Style>
+
     <Style TargetType="Border" x:Key="Card">
         <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource Gray200}, Dark=#2A2A2A}" />
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light=White, Dark=#1E1E1E}" />

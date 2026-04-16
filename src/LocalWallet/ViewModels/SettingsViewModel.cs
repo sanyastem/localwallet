@@ -1,5 +1,7 @@
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using LocalWallet.Models;
 using LocalWallet.Services;
 using LocalWallet.Services.Database;
 using LocalWallet.Services.ExchangeRates;
@@ -16,9 +18,11 @@ public partial class SettingsViewModel : BaseViewModel
     private readonly IExportService _export;
     private readonly IExchangeRateService _rates;
 
-    [ObservableProperty] private string baseCurrency = "PLN";
-    [ObservableProperty] private string displayCurrencies = "PLN,EUR,USD";
+    [ObservableProperty] private ObservableCollection<CurrencyInfo> availableCurrencies = new();
+    [ObservableProperty] private ObservableCollection<CurrencyChoice> displayChoices = new();
+    [ObservableProperty] private CurrencyInfo? selectedBaseCurrency;
     [ObservableProperty] private bool biometricEnabled;
+    [ObservableProperty] private bool biometricAvailable;
     [ObservableProperty] private DateTime deleteFromDate = DateTime.Today.AddMonths(-1);
     [ObservableProperty] private DateTime deleteToDate = DateTime.Today;
     [ObservableProperty] private string lastRatesUpdateText = "никогда";
@@ -41,19 +45,43 @@ public partial class SettingsViewModel : BaseViewModel
     [RelayCommand]
     public async Task LoadAsync()
     {
+        AvailableCurrencies.Clear();
+        foreach (var c in SupportedCurrencies.All) AvailableCurrencies.Add(c);
+
         var s = await _settings.GetAsync();
-        BaseCurrency = s.BaseCurrency;
-        DisplayCurrencies = s.DisplayCurrenciesCsv;
-        BiometricEnabled = s.BiometricEnabled;
+        SelectedBaseCurrency = SupportedCurrencies.Find(s.BaseCurrency) ?? AvailableCurrencies.First();
+
+        var selected = s.DisplayCurrenciesCsv
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Select(x => x.ToUpperInvariant())
+            .ToHashSet();
+
+        DisplayChoices.Clear();
+        foreach (var c in SupportedCurrencies.All)
+        {
+            DisplayChoices.Add(new CurrencyChoice
+            {
+                Currency = c,
+                IsSelected = selected.Contains(c.Code)
+            });
+        }
+
+        BiometricAvailable = await _biometric.IsAvailableAsync();
+        BiometricEnabled = s.BiometricEnabled && BiometricAvailable;
         LastRatesUpdateText = s.LastRatesUpdate?.ToLocalTime().ToString("yyyy-MM-dd HH:mm") ?? "никогда";
     }
 
     [RelayCommand]
     private async Task SaveCurrencyAsync()
     {
-        await _settings.SetBaseCurrencyAsync(BaseCurrency);
-        await _settings.SetDisplayCurrenciesAsync(
-            DisplayCurrencies.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
+        var baseCode = SelectedBaseCurrency?.Code ?? "PLN";
+        var selected = DisplayChoices.Where(c => c.IsSelected).Select(c => c.Currency.Code).ToList();
+        if (selected.Count == 0) selected.Add(baseCode);
+        if (!selected.Contains(baseCode)) selected.Insert(0, baseCode);
+
+        await _settings.SetBaseCurrencyAsync(baseCode);
+        await _settings.SetDisplayCurrenciesAsync(selected);
+
         if (Application.Current?.MainPage is not null)
             await Application.Current.MainPage.DisplayAlert("Настройки", "Сохранено.", "OK");
     }
@@ -63,8 +91,7 @@ public partial class SettingsViewModel : BaseViewModel
     {
         if (BiometricEnabled)
         {
-            var available = await _biometric.IsAvailableAsync();
-            if (!available)
+            if (!BiometricAvailable)
             {
                 BiometricEnabled = false;
                 if (Application.Current?.MainPage is not null)
@@ -117,7 +144,8 @@ public partial class SettingsViewModel : BaseViewModel
     [RelayCommand]
     private async Task RefreshRatesAsync()
     {
-        var ok = await _rates.RefreshRatesAsync(BaseCurrency);
+        var baseCode = SelectedBaseCurrency?.Code ?? "PLN";
+        var ok = await _rates.RefreshRatesAsync(baseCode);
         await LoadAsync();
         if (Application.Current?.MainPage is not null)
             await Application.Current.MainPage.DisplayAlert(

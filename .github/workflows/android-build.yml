@@ -97,6 +97,25 @@ jobs:
           path: /tmp/publish.log
           retention-days: 7
 
+      - name: Push build log to ci-log branch (on failure)
+        if: always() && steps.publish.outcome == 'failure'
+        shell: bash
+        run: |
+          set +e
+          git config user.name "ci"
+          git config user.email "ci@localwallet.local"
+          WORK=$(mktemp -d)
+          cd "$WORK"
+          git init -q
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git checkout --orphan ci-log
+          cp /tmp/publish.log latest.txt || echo "no log" > latest.txt
+          echo "$GITHUB_SHA" > sha.txt
+          git add -A
+          git commit -q -m "CI log for $GITHUB_SHA"
+          git push -f origin ci-log
+          echo "Pushed CI log. Inspect with: https://raw.githubusercontent.com/${{ github.repository }}/ci-log/latest.txt"
+
       - name: Fail if publish failed
         if: steps.publish.outcome == 'failure'
         run: exit 1

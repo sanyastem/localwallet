@@ -5,104 +5,103 @@
              xmlns:m="clr-namespace:LocalWallet.Models"
              x:Class="LocalWallet.Views.AddTransactionPage"
              x:DataType="vm:AddTransactionViewModel"
+             BackgroundColor="Transparent"
              Title="Новая операция">
 
-    <ScrollView>
-        <VerticalStackLayout Padding="16" Spacing="14">
+    <Grid Background="{StaticResource AmbientBg}">
+        <ScrollView>
+            <VerticalStackLayout Padding="16,12,16,24" Spacing="14">
 
-            <Border StrokeShape="RoundRectangle 26"
-                    Stroke="{AppThemeBinding Light={StaticResource Outline}, Dark={StaticResource OutlineDark}}"
-                    BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceAlt}, Dark={StaticResource SurfaceAltDark}}"
-                    Padding="4">
-                <Grid ColumnDefinitions="*,*" ColumnSpacing="4" HeightRequest="48">
-                    <Border Grid.Column="0"
-                            StrokeShape="RoundRectangle 22"
-                            Stroke="Transparent"
-                            BackgroundColor="{Binding ExpenseBg}">
-                        <Border.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding SetExpenseCommand}" />
-                        </Border.GestureRecognizers>
-                        <Label Text="− Расход"
-                               HorizontalOptions="Center"
-                               VerticalOptions="Center"
-                               FontAttributes="Bold"
-                               TextColor="{Binding ExpenseText}" />
-                    </Border>
-                    <Border Grid.Column="1"
-                            StrokeShape="RoundRectangle 22"
-                            Stroke="Transparent"
-                            BackgroundColor="{Binding IncomeBg}">
-                        <Border.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding SetIncomeCommand}" />
-                        </Border.GestureRecognizers>
-                        <Label Text="+ Доход"
-                               HorizontalOptions="Center"
-                               VerticalOptions="Center"
-                               FontAttributes="Bold"
-                               TextColor="{Binding IncomeText}" />
-                    </Border>
+                <!-- Expense/Income segmented toggle -->
+                <Border Style="{StaticResource GlassCard}" Padding="6">
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="6" HeightRequest="48">
+                        <Border Grid.Column="0"
+                                Stroke="Transparent"
+                                BackgroundColor="{Binding ExpenseBg}">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="14" />
+                            </Border.StrokeShape>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SetExpenseCommand}" />
+                            </Border.GestureRecognizers>
+                            <Label Text="− Расход"
+                                   HorizontalOptions="Center"
+                                   VerticalOptions="Center"
+                                   FontAttributes="Bold"
+                                   TextColor="{Binding ExpenseText}" />
+                        </Border>
+                        <Border Grid.Column="1"
+                                Stroke="Transparent"
+                                BackgroundColor="{Binding IncomeBg}">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="14" />
+                            </Border.StrokeShape>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SetIncomeCommand}" />
+                            </Border.GestureRecognizers>
+                            <Label Text="+ Доход"
+                                   HorizontalOptions="Center"
+                                   VerticalOptions="Center"
+                                   FontAttributes="Bold"
+                                   TextColor="{Binding IncomeText}" />
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <!-- Form -->
+                <Border Style="{StaticResource GlassCard}">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Сумма" Style="{StaticResource Caption}" />
+                        <Border Style="{StaticResource GlassInput}">
+                            <Entry Text="{Binding Amount}" BackgroundColor="Transparent" Keyboard="Numeric" Placeholder="0.00" FontSize="18" />
+                        </Border>
+
+                        <Label Text="Валюта" Style="{StaticResource Caption}" />
+                        <Border Style="{StaticResource GlassInput}">
+                            <Picker ItemsSource="{Binding AvailableCurrencies}"
+                                    BackgroundColor="Transparent"
+                                    SelectedItem="{Binding SelectedCurrency, Mode=TwoWay}"
+                                    ItemDisplayBinding="{Binding Display}"
+                                    Title="Выберите валюту" />
+                        </Border>
+
+                        <Label Text="Счёт" Style="{StaticResource Caption}" />
+                        <Border Style="{StaticResource GlassInput}">
+                            <Picker ItemsSource="{Binding Accounts}"
+                                    BackgroundColor="Transparent"
+                                    ItemDisplayBinding="{Binding Name}"
+                                    SelectedItem="{Binding SelectedAccount, Mode=TwoWay}" />
+                        </Border>
+
+                        <Label Text="Категория" Style="{StaticResource Caption}" />
+                        <Border Style="{StaticResource GlassInput}">
+                            <Picker ItemsSource="{Binding Categories}"
+                                    BackgroundColor="Transparent"
+                                    ItemDisplayBinding="{Binding Name}"
+                                    SelectedItem="{Binding SelectedCategory, Mode=TwoWay}" />
+                        </Border>
+
+                        <Label Text="Дата" Style="{StaticResource Caption}" />
+                        <Border Style="{StaticResource GlassInput}">
+                            <DatePicker Date="{Binding Date, Mode=TwoWay}" />
+                        </Border>
+
+                        <Label Text="Заметка" Style="{StaticResource Caption}" />
+                        <Border Style="{StaticResource GlassInput}" Padding="12,4">
+                            <Editor Text="{Binding Note, Mode=TwoWay}"
+                                    BackgroundColor="Transparent"
+                                    HeightRequest="80"
+                                    AutoSize="TextChanges" />
+                        </Border>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                    <Button Grid.Column="0" Text="Отмена" Style="{StaticResource GlassSecondary}" Command="{Binding CancelCommand}" />
+                    <Button Grid.Column="1" Text="Сохранить" Style="{StaticResource GlassPrimary}" Command="{Binding SaveCommand}" />
                 </Grid>
-            </Border>
 
-            <VerticalStackLayout Spacing="4">
-                <Label Text="Сумма" Style="{StaticResource FieldLabel}" />
-                <Border Style="{StaticResource InputWrap}">
-                    <Entry Text="{Binding Amount}" Keyboard="Numeric" Placeholder="0.00" FontSize="18" />
-                </Border>
             </VerticalStackLayout>
-
-            <VerticalStackLayout Spacing="4">
-                <Label Text="Валюта" Style="{StaticResource FieldLabel}" />
-                <Border Style="{StaticResource InputWrap}">
-                    <Picker ItemsSource="{Binding AvailableCurrencies}"
-                            SelectedItem="{Binding SelectedCurrency, Mode=TwoWay}"
-                            ItemDisplayBinding="{Binding Display}"
-                            Title="Выберите валюту" />
-                </Border>
-            </VerticalStackLayout>
-
-            <VerticalStackLayout Spacing="4">
-                <Label Text="Счёт" Style="{StaticResource FieldLabel}" />
-                <Border Style="{StaticResource InputWrap}">
-                    <Picker ItemsSource="{Binding Accounts}"
-                            ItemDisplayBinding="{Binding Name}"
-                            SelectedItem="{Binding SelectedAccount, Mode=TwoWay}" />
-                </Border>
-            </VerticalStackLayout>
-
-            <VerticalStackLayout Spacing="4">
-                <Label Text="Категория" Style="{StaticResource FieldLabel}" />
-                <Border Style="{StaticResource InputWrap}">
-                    <Picker ItemsSource="{Binding Categories}"
-                            ItemDisplayBinding="{Binding Name}"
-                            SelectedItem="{Binding SelectedCategory, Mode=TwoWay}" />
-                </Border>
-            </VerticalStackLayout>
-
-            <VerticalStackLayout Spacing="4">
-                <Label Text="Дата" Style="{StaticResource FieldLabel}" />
-                <Border Style="{StaticResource InputWrap}">
-                    <DatePicker Date="{Binding Date, Mode=TwoWay}" />
-                </Border>
-            </VerticalStackLayout>
-
-            <VerticalStackLayout Spacing="4">
-                <Label Text="Заметка" Style="{StaticResource FieldLabel}" />
-                <Border Style="{StaticResource InputWrap}" Padding="12,4">
-                    <Editor Text="{Binding Note, Mode=TwoWay}" HeightRequest="80" AutoSize="TextChanges" />
-                </Border>
-            </VerticalStackLayout>
-
-            <Grid ColumnDefinitions="*,*" ColumnSpacing="10" Margin="0,12,0,0">
-                <Button Grid.Column="0"
-                        Text="Отмена"
-                        Command="{Binding CancelCommand}"
-                        Style="{StaticResource Secondary}" />
-                <Button Grid.Column="1"
-                        Text="Сохранить"
-                        Command="{Binding SaveCommand}" />
-            </Grid>
-
-        </VerticalStackLayout>
-    </ScrollView>
+        </ScrollView>
+    </Grid>
 </ContentPage>

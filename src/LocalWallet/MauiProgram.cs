@@ -8,6 +8,7 @@ using LocalWallet.ViewModels;
 using LocalWallet.Views;
 using Microcharts.Maui;
 using Microsoft.Extensions.Logging;
+using ZXing.Net.Maui.Controls;
 
 namespace LocalWallet;
 
@@ -19,6 +20,7 @@ public static class MauiProgram
         builder
             .UseMauiApp<App>()
             .UseMicrocharts()
+            .UseBarcodeReader()
             .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("MaterialIcons-Regular.ttf", "MatIcon");

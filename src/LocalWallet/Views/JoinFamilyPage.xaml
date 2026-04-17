@@ -2,52 +2,110 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:LocalWallet.ViewModels"
+             xmlns:zxing="clr-namespace:ZXing.Net.Maui.Controls;assembly=ZXing.Net.MAUI.Controls"
+             xmlns:zxingnet="clr-namespace:ZXing.Net.Maui;assembly=ZXing.Net.MAUI"
              x:Class="LocalWallet.Views.JoinFamilyPage"
              x:DataType="vm:JoinFamilyViewModel"
+             BackgroundColor="Transparent"
              Title="Присоединиться">
 
-    <ScrollView>
-        <VerticalStackLayout Padding="16" Spacing="14">
+    <Grid Background="{StaticResource AmbientBg}">
+        <ScrollView>
+            <VerticalStackLayout Padding="16,12,16,24" Spacing="14">
 
-            <Label Text="Присоединиться к семье" Style="{StaticResource SectionHeader}" />
-            <Label Text="На устройстве-владельце откройте «Пригласить» — покажется QR-код. Ниже вставьте JSON-содержимое QR (декодируется любым сканером)."
-                   Style="{StaticResource FieldLabel}"
-                   HorizontalTextAlignment="Start" />
+                <Label Text="Присоединиться к семье" Style="{StaticResource H1}" />
+                <Label Text="Наведите камеру на QR-код на устройстве-владельце."
+                       Style="{StaticResource Caption}" />
 
-            <Border Style="{StaticResource InputWrap}" Padding="12,4">
-                <Editor Text="{Binding InviteJson, Mode=TwoWay}"
-                        Placeholder="JSON приглашения"
-                        HeightRequest="140" />
-            </Border>
+                <!-- Scanner card -->
+                <Border Style="{StaticResource GlassCard}" Padding="6" IsVisible="{Binding SasVisible, Converter={StaticResource InverseBool}}">
+                    <Grid HeightRequest="320">
+                        <zxing:CameraBarcodeReaderView
+                            x:Name="Scanner"
+                            BarcodesDetected="OnBarcodesDetected"
+                            IsDetecting="{Binding IsScanning}">
+                            <zxing:CameraBarcodeReaderView.Options>
+                                <zxingnet:BarcodeReaderOptions
+                                    Formats="QrCode"
+                                    AutoRotate="True"
+                                    Multiple="False"
+                                    TryHarder="True" />
+                            </zxing:CameraBarcodeReaderView.Options>
+                        </zxing:CameraBarcodeReaderView>
 
-            <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
-                <Button Grid.Column="0" Text="Вставить из буфера" Style="{StaticResource Secondary}" Command="{Binding PasteCommand}" />
-                <Button Grid.Column="1" Text="Подключиться" Command="{Binding ConnectCommand}" />
-            </Grid>
+                        <!-- Simple cutout frame overlay -->
+                        <Border Stroke="White"
+                                StrokeThickness="2"
+                                BackgroundColor="Transparent"
+                                WidthRequest="220"
+                                HeightRequest="220"
+                                HorizontalOptions="Center"
+                                VerticalOptions="Center"
+                                Opacity="0.6">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="18" />
+                            </Border.StrokeShape>
+                        </Border>
 
-            <Label Text="{Binding Status}" FontSize="13" HorizontalTextAlignment="Center" />
-
-            <Border IsVisible="{Binding SasVisible}" Style="{StaticResource Card}" Padding="16" Margin="0,12,0,0">
-                <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
-                    <Label Text="Код подтверждения" Style="{StaticResource FieldLabel}" HorizontalOptions="Center" />
-                    <Label Text="{Binding Sas}"
-                           FontSize="40"
-                           FontAttributes="Bold"
-                           CharacterSpacing="6"
-                           HorizontalOptions="Center" />
-                    <Label Text="{Binding PeerDisplayName, StringFormat='Устройство: {0}'}"
-                           Style="{StaticResource FieldLabel}"
-                           HorizontalOptions="Center" />
-                    <Label Text="Сверьте код с кодом на первом устройстве и подтвердите"
-                           Style="{StaticResource FieldLabel}"
-                           HorizontalTextAlignment="Center" />
-                    <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
-                        <Button Grid.Column="0" Text="Отмена" Style="{StaticResource Secondary}" Command="{Binding CancelCommand}" />
-                        <Button Grid.Column="1" Text="Коды совпадают" Command="{Binding ConfirmSasCommand}" />
+                        <Label Text="{Binding ScanHint}"
+                               TextColor="White"
+                               FontSize="12"
+                               BackgroundColor="#99000000"
+                               Padding="12,6"
+                               HorizontalOptions="Center"
+                               VerticalOptions="End"
+                               Margin="0,0,0,12" />
                     </Grid>
-                </VerticalStackLayout>
-            </Border>
+                </Border>
 
-        </VerticalStackLayout>
-    </ScrollView>
+                <!-- Manual fallback -->
+                <Border Style="{StaticResource GlassCard}" IsVisible="{Binding SasVisible, Converter={StaticResource InverseBool}}">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Не работает камера?" Style="{StaticResource H2}" />
+                        <Label Text="Вставьте JSON-содержимое QR (можно декодировать любым сканером)."
+                               Style="{StaticResource Caption}" />
+                        <Border Style="{StaticResource GlassInput}" Padding="12,4">
+                            <Editor Text="{Binding InviteJson, Mode=TwoWay}"
+                                    Placeholder="JSON приглашения"
+                                    BackgroundColor="Transparent"
+                                    HeightRequest="100" />
+                        </Border>
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                            <Button Grid.Column="0" Text="Вставить из буфера" Style="{StaticResource GlassSecondary}" Command="{Binding PasteCommand}" />
+                            <Button Grid.Column="1" Text="Подключиться" Style="{StaticResource GlassPrimary}" Command="{Binding ConnectCommand}" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Status -->
+                <Label Text="{Binding Status}" Style="{StaticResource Caption}" HorizontalTextAlignment="Center" />
+
+                <!-- SAS confirmation -->
+                <Border IsVisible="{Binding SasVisible}" Style="{StaticResource GlassCard}">
+                    <VerticalStackLayout Spacing="10" HorizontalOptions="Center">
+                        <Label Text="Код подтверждения" Style="{StaticResource CaptionBold}" HorizontalOptions="Center" />
+                        <Label Text="{Binding Sas}"
+                               Style="{StaticResource Display}"
+                               CharacterSpacing="8"
+                               HorizontalOptions="Center" />
+                        <Label Style="{StaticResource Caption}" HorizontalOptions="Center">
+                            <Label.Text>
+                                <MultiBinding StringFormat="Устройство: {0}">
+                                    <Binding Path="PeerDisplayName" />
+                                </MultiBinding>
+                            </Label.Text>
+                        </Label>
+                        <Label Text="Сверьте код с первым устройством и подтвердите."
+                               Style="{StaticResource Caption}"
+                               HorizontalTextAlignment="Center" />
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="8" Margin="0,6,0,0">
+                            <Button Grid.Column="0" Text="Отмена" Style="{StaticResource GlassSecondary}" Command="{Binding CancelCommand}" />
+                            <Button Grid.Column="1" Text="Коды совпадают" Style="{StaticResource GlassPrimary}" Command="{Binding ConfirmSasCommand}" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
 </ContentPage>

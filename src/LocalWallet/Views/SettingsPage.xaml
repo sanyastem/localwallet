@@ -5,118 +5,144 @@
              xmlns:m="clr-namespace:LocalWallet.Models"
              x:Class="LocalWallet.Views.SettingsPage"
              x:DataType="vm:SettingsViewModel"
+             BackgroundColor="Transparent"
              Title="Настройки">
 
-    <ScrollView>
-        <VerticalStackLayout Padding="16" Spacing="18">
+    <Grid Background="{StaticResource AmbientBg}">
+        <ScrollView>
+            <VerticalStackLayout Padding="16,12,16,24" Spacing="14">
 
-            <Label Text="Валюты" FontSize="18" FontAttributes="Bold" />
+                <!-- Currencies -->
+                <Border Style="{StaticResource GlassCard}">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Валюты" Style="{StaticResource H2}" />
+                        <Label Text="Базовая валюта" Style="{StaticResource Caption}" />
+                        <Border Style="{StaticResource GlassInput}">
+                            <Picker ItemsSource="{Binding AvailableCurrencies}"
+                                    BackgroundColor="Transparent"
+                                    SelectedItem="{Binding SelectedBaseCurrency, Mode=TwoWay}"
+                                    ItemDisplayBinding="{Binding Display}"
+                                    Title="Выберите валюту" />
+                        </Border>
 
-            <Label Text="Базовая валюта" />
-            <Picker ItemsSource="{Binding AvailableCurrencies}"
-                    SelectedItem="{Binding SelectedBaseCurrency, Mode=TwoWay}"
-                    ItemDisplayBinding="{Binding Display}"
-                    Title="Выберите валюту" />
+                        <Label Text="Отображаемые валюты" Style="{StaticResource Caption}" />
+                        <CollectionView ItemsSource="{Binding DisplayChoices}"
+                                        SelectionMode="None"
+                                        HeightRequest="320">
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="vm:CurrencyChoice">
+                                    <Grid Padding="4,6" ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                        <Label Grid.Column="0" Text="{Binding Currency.Display}" VerticalOptions="Center" />
+                                        <CheckBox Grid.Column="1"
+                                                  IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                                  Color="{StaticResource AccentGreen}"
+                                                  VerticalOptions="Center" />
+                                    </Grid>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                        <Button Text="Сохранить валюты" Style="{StaticResource GlassPrimary}" Command="{Binding SaveCurrencyCommand}" />
+                    </VerticalStackLayout>
+                </Border>
 
-            <Label Text="Отображаемые валюты" />
-            <Border Style="{StaticResource Card}" Padding="4">
-                <CollectionView ItemsSource="{Binding DisplayChoices}"
-                                SelectionMode="None"
-                                HeightRequest="360">
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate x:DataType="vm:CurrencyChoice">
-                            <Grid Padding="8,6" ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                                <Label Grid.Column="0"
-                                       Text="{Binding Currency.Display}"
-                                       VerticalOptions="Center" />
-                                <CheckBox Grid.Column="1"
-                                          IsChecked="{Binding IsSelected, Mode=TwoWay}"
-                                          Color="{StaticResource Primary}"
-                                          VerticalOptions="Center" />
-                            </Grid>
-                        </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                </CollectionView>
-            </Border>
+                <!-- Security -->
+                <Border Style="{StaticResource GlassCard}">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Безопасность" Style="{StaticResource H2}" />
+                        <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding BiometricAvailable}">
+                            <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                <Label Text="Биометрия при входе" FontAttributes="Bold" />
+                                <Label Text="Отпечаток / лицо при запуске" Style="{StaticResource Caption}" />
+                            </VerticalStackLayout>
+                            <Switch Grid.Column="1"
+                                    OnColor="{StaticResource AccentGreen}"
+                                    IsToggled="{Binding BiometricEnabled, Mode=TwoWay}"
+                                    Toggled="OnBiometricToggled"
+                                    VerticalOptions="Center" />
+                        </Grid>
+                        <Label Text="Биометрия на устройстве не настроена"
+                               Style="{StaticResource Caption}"
+                               IsVisible="{Binding BiometricAvailable, Converter={StaticResource InverseBool}}" />
+                    </VerticalStackLayout>
+                </Border>
 
-            <Button Text="Сохранить валюты"
-                    Command="{Binding SaveCurrencyCommand}" />
+                <!-- This device -->
+                <Border Style="{StaticResource GlassCard}">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Это устройство" Style="{StaticResource H2}" />
+                        <Label Text="Имя устройства (видно другим участникам семьи)" Style="{StaticResource Caption}" />
+                        <Border Style="{StaticResource GlassInput}">
+                            <Entry Text="{Binding DeviceDisplayName, Mode=TwoWay}"
+                                   BackgroundColor="Transparent"
+                                   Placeholder="Моё устройство" />
+                        </Border>
+                        <Button Text="Сохранить имя" Style="{StaticResource GlassSecondary}" Command="{Binding SaveDeviceNameCommand}" />
+                        <Label Style="{StaticResource Caption}">
+                            <Label.Text>
+                                <MultiBinding StringFormat="ID устройства: {0}">
+                                    <Binding Path="DeviceIdShort" />
+                                </MultiBinding>
+                            </Label.Text>
+                        </Label>
+                    </VerticalStackLayout>
+                </Border>
 
-            <BoxView HeightRequest="1" Color="{StaticResource Gray300}" />
+                <!-- Directories -->
+                <Border Style="{StaticResource GlassCard}">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Справочники" Style="{StaticResource H2}" />
+                        <Button Text="Счета" Style="{StaticResource GlassSecondary}" Command="{Binding OpenAccountsCommand}" />
+                        <Button Text="Категории" Style="{StaticResource GlassSecondary}" Command="{Binding OpenCategoriesCommand}" />
+                        <Button Text="Семьи и синхронизация" Style="{StaticResource GlassSecondary}" Command="{Binding OpenFamiliesCommand}" />
+                    </VerticalStackLayout>
+                </Border>
 
-            <Label Text="Безопасность" FontSize="18" FontAttributes="Bold" />
-            <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding BiometricAvailable}">
-                <VerticalStackLayout Grid.Column="0" Spacing="2">
-                    <Label Text="Биометрия при входе" FontAttributes="Bold" />
-                    <Label Text="Отпечаток / лицо при запуске"
-                           FontSize="12" TextColor="{StaticResource Gray500}" />
-                </VerticalStackLayout>
-                <Switch Grid.Column="1"
-                        OnColor="{StaticResource Primary}"
-                        IsToggled="{Binding BiometricEnabled, Mode=TwoWay}"
-                        Toggled="OnBiometricToggled"
-                        VerticalOptions="Center" />
-            </Grid>
-            <Label Text="Биометрия на устройстве не настроена"
-                   FontSize="12"
-                   TextColor="{StaticResource Gray500}"
-                   IsVisible="{Binding BiometricAvailable, Converter={StaticResource InverseBool}}" />
+                <!-- Rates -->
+                <Border Style="{StaticResource GlassCard}">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Курсы валют" Style="{StaticResource H2}" />
+                        <Label Style="{StaticResource Caption}">
+                            <Label.Text>
+                                <MultiBinding StringFormat="Последнее обновление: {0}">
+                                    <Binding Path="LastRatesUpdateText" />
+                                </MultiBinding>
+                            </Label.Text>
+                        </Label>
+                        <Button Text="Обновить курсы" Style="{StaticResource GlassPrimary}" Command="{Binding RefreshRatesCommand}" />
+                    </VerticalStackLayout>
+                </Border>
 
-            <BoxView HeightRequest="1" Color="{StaticResource Gray300}" />
+                <!-- Data -->
+                <Border Style="{StaticResource GlassCard}">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Данные" Style="{StaticResource H2}" />
+                        <Button Text="Экспорт в CSV" Style="{StaticResource GlassSecondary}" Command="{Binding ExportCsvCommand}" />
 
-            <Label Text="Это устройство" FontSize="18" FontAttributes="Bold" />
-            <Label Text="Имя устройства (будет видно другим участникам семьи)"
-                   Style="{StaticResource FieldLabel}" />
-            <Border Style="{StaticResource InputWrap}">
-                <Entry Text="{Binding DeviceDisplayName, Mode=TwoWay}" Placeholder="Моё устройство" />
-            </Border>
-            <Button Text="Сохранить имя" Command="{Binding SaveDeviceNameCommand}" />
-            <Label FontSize="12" TextColor="{StaticResource Gray500}">
-                <Label.Text>
-                    <MultiBinding StringFormat="ID устройства: {0}">
-                        <Binding Path="DeviceIdShort" />
-                    </MultiBinding>
-                </Label.Text>
-            </Label>
+                        <Label Text="Удалить операции за период" Style="{StaticResource Caption}" />
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                            <DatePicker Grid.Column="0" Date="{Binding DeleteFromDate, Mode=TwoWay}" />
+                            <DatePicker Grid.Column="1" Date="{Binding DeleteToDate, Mode=TwoWay}" />
+                        </Grid>
+                        <Button Text="Удалить за период"
+                                BackgroundColor="{StaticResource DangerRed}"
+                                TextColor="White"
+                                FontAttributes="Bold"
+                                CornerRadius="16"
+                                Padding="18,14"
+                                MinimumHeightRequest="50"
+                                Command="{Binding DeletePeriodCommand}" />
+                        <Button Text="Сбросить все данные"
+                                BackgroundColor="#B71C1C"
+                                TextColor="White"
+                                FontAttributes="Bold"
+                                CornerRadius="16"
+                                Padding="18,14"
+                                MinimumHeightRequest="50"
+                                Command="{Binding ResetAllCommand}" />
+                    </VerticalStackLayout>
+                </Border>
 
-            <BoxView HeightRequest="1" Color="{StaticResource Gray300}" />
-
-            <Label Text="Справочники" FontSize="18" FontAttributes="Bold" />
-            <Button Text="Счета" Command="{Binding OpenAccountsCommand}" />
-            <Button Text="Категории" Command="{Binding OpenCategoriesCommand}" />
-            <Button Text="Семьи и синхронизация" Command="{Binding OpenFamiliesCommand}" />
-
-            <BoxView HeightRequest="1" Color="{StaticResource Gray300}" />
-
-            <Label Text="Курсы валют" FontSize="18" FontAttributes="Bold" />
-            <Label FontSize="12" TextColor="{StaticResource Gray500}">
-                <Label.Text>
-                    <MultiBinding StringFormat="Последнее обновление: {0}">
-                        <Binding Path="LastRatesUpdateText" />
-                    </MultiBinding>
-                </Label.Text>
-            </Label>
-            <Button Text="Обновить курсы" Command="{Binding RefreshRatesCommand}" />
-
-            <BoxView HeightRequest="1" Color="{StaticResource Gray300}" />
-
-            <Label Text="Данные" FontSize="18" FontAttributes="Bold" />
-
-            <Button Text="Экспорт в CSV" Command="{Binding ExportCsvCommand}" />
-
-            <Label Text="Удалить операции за период" />
-            <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
-                <DatePicker Grid.Column="0" Date="{Binding DeleteFromDate, Mode=TwoWay}" />
-                <DatePicker Grid.Column="1" Date="{Binding DeleteToDate, Mode=TwoWay}" />
-            </Grid>
-            <Button Text="Удалить за период"
-                    Command="{Binding DeletePeriodCommand}"
-                    BackgroundColor="#D32F2F" TextColor="White" />
-
-            <Button Text="Сбросить все данные"
-                    Command="{Binding ResetAllCommand}"
-                    BackgroundColor="#B71C1C" TextColor="White" />
-
-        </VerticalStackLayout>
-    </ScrollView>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
 </ContentPage>

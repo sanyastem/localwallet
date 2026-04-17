@@ -4,48 +4,74 @@
              xmlns:vm="clr-namespace:LocalWallet.ViewModels"
              x:Class="LocalWallet.Views.InvitePage"
              x:DataType="vm:InviteViewModel"
+             BackgroundColor="Transparent"
              Title="Пригласить">
 
-    <ScrollView>
-        <VerticalStackLayout Padding="16" Spacing="14" HorizontalOptions="Center">
+    <Grid Background="{StaticResource AmbientBg}">
+        <ScrollView>
+            <VerticalStackLayout Padding="16,12,16,24" Spacing="14">
 
-            <Label Text="{Binding Family.Name, StringFormat='Приглашение в «{0}»'}"
-                   Style="{StaticResource SectionHeader}"
-                   HorizontalOptions="Center" />
+                <Label Style="{StaticResource H1}" HorizontalOptions="Center">
+                    <Label.Text>
+                        <MultiBinding StringFormat="Приглашение в «{0}»">
+                            <Binding Path="Family.Name" FallbackValue="Семья" />
+                        </MultiBinding>
+                    </Label.Text>
+                </Label>
 
-            <Label Text="Покажите QR-код другому устройству. Оно отсканирует и подключится."
-                   Style="{StaticResource FieldLabel}"
-                   HorizontalTextAlignment="Center" />
+                <Label Text="Покажите QR-код другому устройству — оно отсканирует и подключится."
+                       Style="{StaticResource Caption}"
+                       HorizontalTextAlignment="Center" />
 
-            <Border Style="{StaticResource Card}" Padding="12" HorizontalOptions="Center">
-                <Image Source="{Binding QrImage}" HeightRequest="260" WidthRequest="260" Aspect="AspectFit" />
-            </Border>
+                <Border Style="{StaticResource GlassCard}" Padding="20" HorizontalOptions="Center">
+                    <Border BackgroundColor="White"
+                            Stroke="Transparent"
+                            Padding="12"
+                            HorizontalOptions="Center">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="18" />
+                        </Border.StrokeShape>
+                        <Image Source="{Binding QrImage}"
+                               HeightRequest="260"
+                               WidthRequest="260"
+                               Aspect="AspectFit" />
+                    </Border>
+                </Border>
 
-            <Label Text="{Binding HostInfo, StringFormat='Сеть: {0}'}"
-                   FontSize="12"
-                   HorizontalOptions="Center"
-                   TextColor="{StaticResource Gray500}" />
+                <Border Style="{StaticResource GlassChip}" HorizontalOptions="Center">
+                    <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                        <Ellipse WidthRequest="6" HeightRequest="6" Fill="#2E7D32" VerticalOptions="Center" />
+                        <Label Style="{StaticResource CaptionBold}" VerticalOptions="Center">
+                            <Label.Text>
+                                <MultiBinding StringFormat="LAN {0}">
+                                    <Binding Path="HostInfo" />
+                                </MultiBinding>
+                            </Label.Text>
+                        </Label>
+                    </HorizontalStackLayout>
+                </Border>
 
-            <Label Text="{Binding Status}" HorizontalTextAlignment="Center" FontSize="13" />
+                <Label Text="{Binding Status}" Style="{StaticResource Caption}" HorizontalTextAlignment="Center" />
 
-            <Border IsVisible="{Binding SasVisible}" Style="{StaticResource Card}" Padding="16" HorizontalOptions="Center">
-                <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
-                    <Label Text="Код подтверждения" Style="{StaticResource FieldLabel}" HorizontalOptions="Center" />
-                    <Label Text="{Binding Sas}"
-                           FontSize="40"
-                           FontAttributes="Bold"
-                           CharacterSpacing="6"
-                           HorizontalOptions="Center" />
-                    <Label Text="Сверьте с кодом на втором устройстве и подтвердите"
-                           Style="{StaticResource FieldLabel}"
-                           HorizontalTextAlignment="Center" />
-                    <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
-                        <Button Grid.Column="0" Text="Отмена" Style="{StaticResource Secondary}" Command="{Binding CancelCommand}" />
-                        <Button Grid.Column="1" Text="Коды совпадают" Command="{Binding ConfirmSasCommand}" />
-                    </Grid>
-                </VerticalStackLayout>
-            </Border>
+                <!-- SAS confirmation -->
+                <Border IsVisible="{Binding SasVisible}" Style="{StaticResource GlassCard}">
+                    <VerticalStackLayout Spacing="10" HorizontalOptions="Center">
+                        <Label Text="Код подтверждения" Style="{StaticResource CaptionBold}" HorizontalOptions="Center" />
+                        <Label Text="{Binding Sas}"
+                               Style="{StaticResource Display}"
+                               CharacterSpacing="8"
+                               HorizontalOptions="Center" />
+                        <Label Text="Сверьте с кодом на втором устройстве."
+                               Style="{StaticResource Caption}"
+                               HorizontalTextAlignment="Center" />
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="8" Margin="0,6,0,0">
+                            <Button Grid.Column="0" Text="Отмена" Style="{StaticResource GlassSecondary}" Command="{Binding CancelCommand}" />
+                            <Button Grid.Column="1" Text="Коды совпадают" Style="{StaticResource GlassPrimary}" Command="{Binding ConfirmSasCommand}" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
 
-        </VerticalStackLayout>
-    </ScrollView>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
 </ContentPage>

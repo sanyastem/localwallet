@@ -39,6 +39,7 @@ public class DatabaseService : IDatabaseService
         await _db.CreateTableAsync<Family>();
         await _db.CreateTableAsync<FamilyMember>();
         await _db.CreateTableAsync<SyncEvent>();
+        await _db.CreateTableAsync<ChatMessage>();
 
         var settings = await _db.FindAsync<AppSettings>(1);
         if (settings is null)
@@ -321,6 +322,41 @@ public class DatabaseService : IDatabaseService
             .FirstOrDefaultAsync();
     }
 
+    // --- Chat messages ---
+
+    public async Task<List<ChatMessage>> GetChatMessagesAsync(Guid familyId, int limit = 500)
+    {
+        var db = await GetConnectionAsync();
+        return await db.Table<ChatMessage>()
+            .Where(m => m.FamilyId == familyId && !m.IsDeleted)
+            .OrderBy(m => m.SentAt)
+            .Take(limit)
+            .ToListAsync();
+    }
+
+    public async Task<ChatMessage?> GetChatMessageAsync(Guid id)
+    {
+        var db = await GetConnectionAsync();
+        return await db.FindAsync<ChatMessage>(id);
+    }
+
+    public async Task SaveChatMessageAsync(ChatMessage message)
+    {
+        var db = await GetConnectionAsync();
+        var existing = await db.FindAsync<ChatMessage>(message.Id);
+        if (existing is null) await db.InsertAsync(message);
+        else await db.UpdateAsync(message);
+    }
+
+    public async Task DeleteChatMessageAsync(Guid id)
+    {
+        var db = await GetConnectionAsync();
+        var m = await db.FindAsync<ChatMessage>(id);
+        if (m is null) return;
+        m.IsDeleted = true;
+        await db.UpdateAsync(m);
+    }
+
     // --- Sync events ---
 
     public async Task<List<SyncEvent>> GetEventsSinceAsync(Guid familyId, string deviceId, long sinceClock)
@@ -376,6 +412,7 @@ public class DatabaseService : IDatabaseService
         await db.DeleteAllAsync<Transaction>();
         await db.DeleteAllAsync<Account>();
         await db.DeleteAllAsync<Category>();
+        await db.DeleteAllAsync<ChatMessage>();
         await db.DeleteAllAsync<ExchangeRate>();
         await db.DeleteAllAsync<AppSettings>();
         // Intentionally keep DeviceIdentity: device keypair is tied to SecureStorage

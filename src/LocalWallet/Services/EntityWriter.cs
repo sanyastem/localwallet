@@ -11,9 +11,11 @@ public interface IEntityWriter
     Task SaveTransactionAsync(Transaction t);
     Task SaveAccountAsync(Account a);
     Task SaveCategoryAsync(Category c);
+    Task SaveChatMessageAsync(ChatMessage m);
     Task DeleteTransactionAsync(Transaction t);
     Task DeleteAccountAsync(Account a);
     Task DeleteCategoryAsync(Category c);
+    Task DeleteChatMessageAsync(ChatMessage m);
 }
 
 public class EntityWriter : IEntityWriter
@@ -21,12 +23,14 @@ public class EntityWriter : IEntityWriter
     private readonly IDatabaseService _db;
     private readonly IEventStore _events;
     private readonly IFamilyService _families;
+    private readonly ISyncService _sync;
 
-    public EntityWriter(IDatabaseService db, IEventStore events, IFamilyService families)
+    public EntityWriter(IDatabaseService db, IEventStore events, IFamilyService families, ISyncService sync)
     {
         _db = db;
         _events = events;
         _families = families;
+        _sync = sync;
     }
 
     public Task SaveTransactionAsync(Transaction t) =>
@@ -43,6 +47,12 @@ public class EntityWriter : IEntityWriter
         c.FamilyId is Guid fid
             ? EmitUpsertAsync(fid, EntityType.Category, c.Id, c, fallback: () => _db.SaveCategoryAsync(c))
             : _db.SaveCategoryAsync(c);
+
+    public Task SaveChatMessageAsync(ChatMessage m) =>
+        EmitUpsertAsync(m.FamilyId, EntityType.ChatMessage, m.Id, m, fallback: () => _db.SaveChatMessageAsync(m));
+
+    public Task DeleteChatMessageAsync(ChatMessage m) =>
+        EmitDeleteAsync(m.FamilyId, EntityType.ChatMessage, m.Id, fallback: () => _db.DeleteChatMessageAsync(m.Id));
 
     public Task DeleteTransactionAsync(Transaction t) =>
         t.FamilyId is Guid fid
@@ -67,6 +77,7 @@ public class EntityWriter : IEntityWriter
         await _events.AppendLocalAsync(
             new EventDraft(familyId, type, entityId, EventOperation.Upsert, payload),
             key);
+        _sync.NotifyLocalEventAppended();
     }
 
     private async Task EmitDeleteAsync(Guid familyId, EntityType type, Guid entityId, Func<Task> fallback)
@@ -76,5 +87,6 @@ public class EntityWriter : IEntityWriter
         await _events.AppendLocalAsync(
             new EventDraft(familyId, type, entityId, EventOperation.Delete, Array.Empty<byte>()),
             key);
+        _sync.NotifyLocalEventAppended();
     }
 }

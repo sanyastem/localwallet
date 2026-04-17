@@ -50,6 +50,12 @@ public interface IDatabaseService
     Task SaveFamilyMemberAsync(FamilyMember member);
     Task<FamilyMember?> FindFamilyMemberAsync(Guid familyId, string deviceId);
 
+    // Chat messages
+    Task<List<ChatMessage>> GetChatMessagesAsync(Guid familyId, int limit = 500);
+    Task<ChatMessage?> GetChatMessageAsync(Guid id);
+    Task SaveChatMessageAsync(ChatMessage message);
+    Task DeleteChatMessageAsync(Guid id);
+
     // Sync events
     Task<List<SyncEvent>> GetEventsSinceAsync(Guid familyId, string deviceId, long sinceClock);
     Task<long> GetMaxClockForDeviceAsync(Guid familyId, string deviceId);

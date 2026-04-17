@@ -93,6 +93,11 @@ public partial class App : Application
                 {
                     var sync = _services.GetRequiredService<ISyncService>();
                     await sync.StartListenerAsync();
+                    // Start LAN auto-discovery + auto-sync only after the listener
+                    // has a port. Beacons advertise that port.
+                    var discovery = _services.GetRequiredService<ILanDiscoveryService>();
+                    await discovery.StartAsync();
+                    _services.GetRequiredService<IAutoSyncCoordinator>().Start();
                 }
                 catch { /* P2P boot is best-effort */ }
             });

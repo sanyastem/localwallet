@@ -15,6 +15,14 @@ public partial class FamilyDetailsPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        try { await _vm.LoadAsync(); } catch { }
+        _vm.OnAttached();
+        try { await _vm.LoadAsync(); }
+        catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"[FamilyDetailsPage.OnAppearing] {ex}"); }
+    }
+
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+        _vm.OnDetached();
     }
 }

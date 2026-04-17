@@ -10,7 +10,7 @@ namespace LocalWallet.Services.Sync;
 
 public class SyncService : ISyncService
 {
-    private const int DefaultPort = 47321;
+    private const int PreferredPort = 47321;
 
     private readonly IDatabaseService _db;
     private readonly IDeviceIdentityService _identity;
@@ -39,13 +39,26 @@ public class SyncService : ISyncService
     public bool IsListening => _listener is not null;
     public int? ListenPort { get; private set; }
 
+    public event Action? LocalEventAppended;
+    public event Action<Guid>? SyncCompleted;
+
     public Task<int> StartListenerAsync(Guid? inviteFamilyId = null, CancellationToken ct = default)
     {
         StopListener();
         _listenerCts = new CancellationTokenSource();
 
-        var listener = new TcpListener(IPAddress.Any, 0);
-        listener.Start();
+        TcpListener listener;
+        // Preferred stable port first — so LAN beacons stay valid across app restarts.
+        try
+        {
+            listener = new TcpListener(IPAddress.Any, PreferredPort);
+            listener.Start();
+        }
+        catch
+        {
+            listener = new TcpListener(IPAddress.Any, 0);
+            listener.Start();
+        }
         _listener = listener;
         ListenPort = ((IPEndPoint)listener.LocalEndpoint).Port;
 
@@ -67,6 +80,11 @@ public class SyncService : ISyncService
         }, token);
 
         return Task.FromResult(ListenPort.Value);
+    }
+
+    public void NotifyLocalEventAppended()
+    {
+        try { LocalEventAppended?.Invoke(); } catch { }
     }
 
     public void StopListener()
@@ -240,6 +258,11 @@ public class SyncService : ISyncService
         {
             f.LastSyncedAt = DateTime.UtcNow;
             await _db.SaveFamilyAsync(f);
+        }
+
+        if (eventsToSend.Count > 0 || accepted > 0)
+        {
+            try { SyncCompleted?.Invoke(familyId); } catch { }
         }
 
         return new SyncResult(true, eventsToSend.Count, accepted);

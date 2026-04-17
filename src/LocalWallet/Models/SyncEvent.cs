@@ -7,7 +7,8 @@ public enum EntityType
     Transaction = 0,
     Account = 1,
     Category = 2,
-    Member = 3
+    Member = 3,
+    ChatMessage = 4
 }
 
 public enum EventOperation

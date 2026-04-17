@@ -4,6 +4,7 @@
                     xmlns:conv="clr-namespace:LocalWallet.Converters">
 
     <conv:InverseBoolConverter x:Key="InverseBool" />
+    <conv:CountToVisibleConverter x:Key="CountToVisible" />
 
     <Color x:Key="Surface">#FFFFFF</Color>
     <Color x:Key="SurfaceDark">#1B1B1B</Color>

@@ -48,6 +48,8 @@ public static class MauiProgram
         builder.Services.AddSingleton<IProjector, Projector>();
         builder.Services.AddSingleton<IEventStore, EventStore>();
         builder.Services.AddSingleton<ISyncService, SyncService>();
+        builder.Services.AddSingleton<ILanDiscoveryService, LanDiscoveryService>();
+        builder.Services.AddSingleton<IAutoSyncCoordinator, AutoSyncCoordinator>();
         builder.Services.AddSingleton<IEntityWriter, EntityWriter>();
 
         // ViewModels
@@ -64,6 +66,7 @@ public static class MauiProgram
         builder.Services.AddTransient<FamilyDetailsViewModel>();
         builder.Services.AddTransient<InviteViewModel>();
         builder.Services.AddTransient<JoinFamilyViewModel>();
+        builder.Services.AddTransient<ChatViewModel>();
 
         // Pages
         builder.Services.AddTransient<LockPage>();
@@ -80,6 +83,7 @@ public static class MauiProgram
         builder.Services.AddTransient<FamilyDetailsPage>();
         builder.Services.AddTransient<InvitePage>();
         builder.Services.AddTransient<JoinFamilyPage>();
+        builder.Services.AddTransient<ChatPage>();
 
         return builder.Build();
     }

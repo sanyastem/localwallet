@@ -13,4 +13,14 @@ public interface ISyncService
     bool IsListening { get; }
 
     int? ListenPort { get; }
+
+    // Raised after a local event is appended to the store. Auto-sync can use it
+    // to push the event to currently-known peers.
+    event Action? LocalEventAppended;
+
+    // Raised after either side of a sync exchange completes with any events
+    // actually moving. ViewModels listen to refresh lists live.
+    event Action<Guid>? SyncCompleted;
+
+    void NotifyLocalEventAppended();
 }

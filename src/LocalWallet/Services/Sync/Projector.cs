@@ -26,7 +26,27 @@ public class Projector : IProjector
             case EntityType.Member:
                 await ProjectMemberAsync(ev, plaintextPayload);
                 break;
+            case EntityType.ChatMessage:
+                await ProjectChatMessageAsync(ev, plaintextPayload);
+                break;
         }
+    }
+
+    private async Task ProjectChatMessageAsync(SyncEvent ev, byte[] payload)
+    {
+        if (ev.Operation == EventOperation.Delete)
+        {
+            await _db.DeleteChatMessageAsync(ev.EntityId);
+            return;
+        }
+        var decoded = JsonSerializer.Deserialize<ChatMessage>(payload);
+        if (decoded is null) return;
+        var current = await _db.GetChatMessageAsync(ev.EntityId);
+        if (current is not null && IsOlderOrEqual(ev, current.LamportClock, current.LastModifiedBy)) return;
+        decoded.LamportClock = ev.LamportClock;
+        decoded.LastModifiedBy = ev.AuthorDeviceId;
+        decoded.AuthorDeviceId = ev.AuthorDeviceId;
+        await _db.SaveChatMessageAsync(decoded);
     }
 
     private async Task ProjectTransactionAsync(SyncEvent ev, byte[] payload)

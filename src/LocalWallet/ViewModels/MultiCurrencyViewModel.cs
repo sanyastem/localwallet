@@ -30,7 +30,10 @@ public partial class MultiCurrencyViewModel : BaseViewModel
     [RelayCommand]
     public async Task LoadAsync()
     {
-        IsBusy = true;
+        // Deliberately does NOT toggle IsBusy — IsBusy is two-way bound to the
+        // RefreshView spinner, and flashing it on every tab visit made the
+        // Валюты tab look like it was "constantly refreshing" when really it
+        // was just loading cached rates on OnAppearing.
         try
         {
             var settings = await _db.GetSettingsAsync();
@@ -87,10 +90,6 @@ public partial class MultiCurrencyViewModel : BaseViewModel
                 : "никогда";
         }
         catch { /* best-effort — pull-to-refresh never gets stuck */ }
-        finally
-        {
-            IsBusy = false;
-        }
     }
 
     [RelayCommand]

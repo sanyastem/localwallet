@@ -61,6 +61,22 @@ public partial class FamilyListViewModel : BaseViewModel
     {
         if (family is null) return;
         try { if (Shell.Current is not null) await Shell.Current.GoToAsync($"{nameof(FamilyDetailsPage)}?id={family.Id}"); }
-        catch { }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[FamilyList.Open] {ex}");
+            await UiAlerts.ShowAsync("Ошибка навигации", ex.Message);
+        }
+    }
+
+    [RelayCommand]
+    private async Task OpenChatAsync(Models.Family family)
+    {
+        if (family is null) return;
+        try { if (Shell.Current is not null) await Shell.Current.GoToAsync($"{nameof(ChatPage)}?id={family.Id}"); }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[FamilyList.OpenChat] {ex}");
+            await UiAlerts.ShowAsync("Ошибка навигации", ex.Message);
+        }
     }
 }

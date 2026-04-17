@@ -19,19 +19,7 @@
                 </LinearGradientBrush>
             </Border.Background>
             <VerticalStackLayout Spacing="8">
-                <Grid ColumnDefinitions="*,Auto">
-                    <Label Grid.Column="0" Text="Общий баланс" TextColor="#CCFFFFFF" FontSize="13" />
-                    <HorizontalStackLayout Grid.Column="1" Spacing="6" IsVisible="{Binding HasPeersOnline}">
-                        <Ellipse Fill="#8BE88E" WidthRequest="8" HeightRequest="8" VerticalOptions="Center" />
-                        <Label TextColor="White" FontSize="12" VerticalOptions="Center">
-                            <Label.Text>
-                                <MultiBinding StringFormat="{}{0} в сети">
-                                    <Binding Path="OnlinePeers" />
-                                </MultiBinding>
-                            </Label.Text>
-                        </Label>
-                    </HorizontalStackLayout>
-                </Grid>
+                <Label Text="Общий баланс" TextColor="#CCFFFFFF" FontSize="13" />
                 <Label FontSize="36" TextColor="White" FontAttributes="Bold">
                     <Label.Text>
                         <MultiBinding StringFormat="{}{0:N2} {1}">

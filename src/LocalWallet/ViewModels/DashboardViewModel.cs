@@ -4,7 +4,6 @@ using CommunityToolkit.Mvvm.Input;
 using LocalWallet.Models;
 using LocalWallet.Services.Database;
 using LocalWallet.Services.ExchangeRates;
-using LocalWallet.Services.Sync;
 using LocalWallet.ViewModels.Base;
 using LocalWallet.Views;
 
@@ -14,20 +13,16 @@ public partial class DashboardViewModel : BaseViewModel
 {
     private readonly IDatabaseService _db;
     private readonly IExchangeRateService _rates;
-    private readonly ILanDiscoveryService _lan;
 
     [ObservableProperty] private decimal totalBalance;
     [ObservableProperty] private string baseCurrency = "PLN";
     [ObservableProperty] private ObservableCollection<TransactionDisplay> recentTransactions = new();
     [ObservableProperty] private bool hasAccounts;
-    [ObservableProperty] private int onlinePeers;
-    [ObservableProperty] private bool hasPeersOnline;
 
-    public DashboardViewModel(IDatabaseService db, IExchangeRateService rates, ILanDiscoveryService lan)
+    public DashboardViewModel(IDatabaseService db, IExchangeRateService rates)
     {
         _db = db;
         _rates = rates;
-        _lan = lan;
         Title = "Главная";
     }
 
@@ -81,9 +76,6 @@ public partial class DashboardViewModel : BaseViewModel
                 });
             }
 
-            try { await _lan.RefreshAsync(); } catch { }
-            OnlinePeers = _lan.Peers.Count;
-            HasPeersOnline = OnlinePeers > 0;
         }
         finally
         {

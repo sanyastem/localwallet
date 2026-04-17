@@ -19,4 +19,6 @@ public interface IFamilyService
     Task<List<FamilyMember>> GetMembersAsync(Guid familyId);
 
     Task UpsertMemberAsync(Guid familyId, string deviceId, string displayName, string role = "Member");
+
+    Task RevokeMemberAsync(Guid familyId, string deviceId);
 }

@@ -21,18 +21,31 @@
             <Label Text="Участники" Style="{StaticResource SectionHeader}" />
 
             <Border Style="{StaticResource Card}" Padding="0">
-                <CollectionView ItemsSource="{Binding Members}" SelectionMode="None" HeightRequest="180">
+                <CollectionView ItemsSource="{Binding Members}" SelectionMode="None" HeightRequest="200">
                     <CollectionView.ItemTemplate>
                         <DataTemplate x:DataType="m:FamilyMember">
-                            <Grid Padding="14,10" ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
-                                <Label Grid.Row="0" Grid.Column="0" Text="{Binding DisplayName}" FontAttributes="Bold" />
-                                <Label Grid.Row="1" Grid.Column="0" Text="{Binding DeviceId}" FontSize="10" TextColor="{StaticResource Gray500}" LineBreakMode="TailTruncation" />
-                                <Label Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" Text="{Binding Role}" FontSize="12" TextColor="{StaticResource Gray500}" VerticalOptions="Center" />
-                            </Grid>
+                            <SwipeView>
+                                <SwipeView.RightItems>
+                                    <SwipeItems>
+                                        <SwipeItem Text="Отозвать"
+                                                   BackgroundColor="#D32F2F"
+                                                   Command="{Binding Source={RelativeSource AncestorType={x:Type vm:FamilyDetailsViewModel}}, Path=RevokeMemberCommand}"
+                                                   CommandParameter="{Binding .}" />
+                                    </SwipeItems>
+                                </SwipeView.RightItems>
+                                <Grid Padding="14,10" ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
+                                    <Label Grid.Row="0" Grid.Column="0" Text="{Binding DisplayName}" FontAttributes="Bold" />
+                                    <Label Grid.Row="1" Grid.Column="0" Text="{Binding DeviceId}" FontSize="10" TextColor="{StaticResource Gray500}" LineBreakMode="TailTruncation" />
+                                    <Label Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" Text="{Binding Role}" FontSize="12" TextColor="{StaticResource Gray500}" VerticalOptions="Center" />
+                                </Grid>
+                            </SwipeView>
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
                 </CollectionView>
             </Border>
+            <Label Text="Свайп влево по участнику — «Отозвать» (только Owner)"
+                   Style="{StaticResource FieldLabel}"
+                   IsVisible="{Binding IsOwner}" />
 
             <Button Text="Пригласить (QR)" Command="{Binding InviteCommand}" />
 

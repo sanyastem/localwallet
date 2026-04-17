@@ -5,6 +5,7 @@ namespace LocalWallet.Views;
 public partial class SettingsPage : ContentPage
 {
     private readonly SettingsViewModel _vm;
+    private bool _suppressBiometricToggle;
 
     public SettingsPage(SettingsViewModel vm)
     {
@@ -15,12 +16,20 @@ public partial class SettingsPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        await _vm.LoadAsync();
+        _suppressBiometricToggle = true;
+        try { await _vm.LoadAsync(); }
+        catch { }
+        finally { _suppressBiometricToggle = false; }
     }
 
     private void OnBiometricToggled(object? sender, ToggledEventArgs e)
     {
-        if (_vm.ToggleBiometricCommand.CanExecute(null))
-            _vm.ToggleBiometricCommand.Execute(null);
+        if (_suppressBiometricToggle) return;
+        try
+        {
+            if (_vm.ToggleBiometricCommand.CanExecute(null))
+                _vm.ToggleBiometricCommand.Execute(null);
+        }
+        catch { }
     }
 }

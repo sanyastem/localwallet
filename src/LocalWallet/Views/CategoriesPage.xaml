@@ -7,35 +7,77 @@
              x:DataType="vm:CategoriesViewModel"
              Title="Категории">
 
-    <Grid RowDefinitions="Auto,*" Padding="16" RowSpacing="12">
+    <Grid RowDefinitions="Auto,*" Padding="16" RowSpacing="14">
 
-        <VerticalStackLayout Grid.Row="0" Spacing="8">
-            <Label Text="Новая категория" FontAttributes="Bold" />
-            <Entry Placeholder="Название" Text="{Binding NewCategoryName, Mode=TwoWay}" />
-            <HorizontalStackLayout Spacing="10">
-                <RadioButton Content="Расход"
-                             IsChecked="{Binding NewIsExpense, Mode=TwoWay}"
-                             GroupName="catType" />
-                <RadioButton Content="Доход" GroupName="catType">
-                    <RadioButton.IsChecked>
-                        <Binding Path="NewIsExpense" Mode="TwoWay">
-                            <Binding.Converter>
-                                <x:StaticResource Key="InverseBool" />
-                            </Binding.Converter>
-                        </Binding>
-                    </RadioButton.IsChecked>
-                </RadioButton>
-            </HorizontalStackLayout>
-            <Button Text="Добавить"
-                    Command="{Binding AddCommand}"
-                    BackgroundColor="{StaticResource Primary}"
-                    TextColor="White" />
-        </VerticalStackLayout>
+        <Border Grid.Row="0" Style="{StaticResource Card}">
+            <VerticalStackLayout Spacing="10">
+                <Label Text="Новая категория" Style="{StaticResource SectionHeader}" />
 
-        <CollectionView Grid.Row="1" ItemsSource="{Binding Items}">
+                <Border StrokeShape="RoundRectangle 26"
+                        Stroke="{AppThemeBinding Light={StaticResource Outline}, Dark={StaticResource OutlineDark}}"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceAlt}, Dark={StaticResource SurfaceAltDark}}"
+                        Padding="4">
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="4" HeightRequest="44">
+                        <Border Grid.Column="0"
+                                StrokeShape="RoundRectangle 22"
+                                Stroke="Transparent"
+                                BackgroundColor="{Binding ExpenseBg}">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SetExpenseCommand}" />
+                            </Border.GestureRecognizers>
+                            <Label Text="− Расход"
+                                   HorizontalOptions="Center"
+                                   VerticalOptions="Center"
+                                   FontAttributes="Bold"
+                                   TextColor="{Binding ExpenseText}" />
+                        </Border>
+                        <Border Grid.Column="1"
+                                StrokeShape="RoundRectangle 22"
+                                Stroke="Transparent"
+                                BackgroundColor="{Binding IncomeBg}">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SetIncomeCommand}" />
+                            </Border.GestureRecognizers>
+                            <Label Text="+ Доход"
+                                   HorizontalOptions="Center"
+                                   VerticalOptions="Center"
+                                   FontAttributes="Bold"
+                                   TextColor="{Binding IncomeText}" />
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="Название" Style="{StaticResource FieldLabel}" />
+                    <Border Style="{StaticResource InputWrap}">
+                        <Entry Placeholder="Например: Еда, Транспорт, Зарплата"
+                               Text="{Binding NewCategoryName, Mode=TwoWay}" />
+                    </Border>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="Область" Style="{StaticResource FieldLabel}" />
+                    <Border Style="{StaticResource InputWrap}">
+                        <Picker ItemsSource="{Binding AvailableScopes}"
+                                SelectedItem="{Binding SelectedScope, Mode=TwoWay}"
+                                ItemDisplayBinding="{Binding Label}"
+                                Title="Личный или семейный" />
+                    </Border>
+                </VerticalStackLayout>
+
+                <Button Text="Добавить категорию" Command="{Binding AddCommand}" Margin="0,4,0,0" />
+            </VerticalStackLayout>
+        </Border>
+
+        <CollectionView Grid.Row="1" ItemsSource="{Binding Items}" SelectionMode="None">
+            <CollectionView.EmptyView>
+                <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Padding="20" Spacing="6">
+                    <Label Text="Пока нет категорий" FontSize="14" TextColor="{StaticResource Gray500}" HorizontalOptions="Center" />
+                </VerticalStackLayout>
+            </CollectionView.EmptyView>
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="m:Category">
-                    <SwipeView>
+                    <SwipeView Margin="0,4">
                         <SwipeView.RightItems>
                             <SwipeItems>
                                 <SwipeItem Text="Удалить"
@@ -44,13 +86,16 @@
                                            CommandParameter="{Binding .}" />
                             </SwipeItems>
                         </SwipeView.RightItems>
-                        <Grid Padding="12" ColumnDefinitions="*,Auto">
-                            <Label Grid.Column="0" Text="{Binding Name}" FontAttributes="Bold" />
-                            <Label Grid.Column="1" Text="{Binding Type}" TextColor="{StaticResource Gray500}" />
-                        </Grid>
+                        <Border Style="{StaticResource Card}" Padding="14">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label Grid.Column="0" Text="{Binding Name}" FontAttributes="Bold" VerticalOptions="Center" />
+                                <Label Grid.Column="1" Text="{Binding Type}" FontSize="12" TextColor="{StaticResource Gray500}" VerticalOptions="Center" />
+                            </Grid>
+                        </Border>
                     </SwipeView>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
+
     </Grid>
 </ContentPage>

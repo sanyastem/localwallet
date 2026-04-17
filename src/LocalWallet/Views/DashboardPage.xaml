@@ -38,7 +38,7 @@
                    IsVisible="{Binding HasAccounts}" />
 
             <RefreshView Grid.Row="1"
-                         IsRefreshing="{Binding IsBusy}"
+                         IsRefreshing="{Binding IsBusy, Mode=TwoWay}"
                          Command="{Binding LoadCommand}">
                 <CollectionView ItemsSource="{Binding RecentTransactions}"
                                 SelectionMode="None">

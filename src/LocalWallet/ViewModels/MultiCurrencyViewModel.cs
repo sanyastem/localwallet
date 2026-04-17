@@ -29,14 +29,16 @@ public partial class MultiCurrencyViewModel : BaseViewModel
     [RelayCommand]
     public async Task LoadAsync()
     {
-        if (IsBusy) return;
         IsBusy = true;
         try
         {
             var settings = await _db.GetSettingsAsync();
             var baseCurrency = settings.BaseCurrency;
             var displayCurrencies = settings.DisplayCurrenciesCsv
-                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Select(x => x.ToUpperInvariant())
+                .ToList();
+            var displaySet = displayCurrencies.ToHashSet(StringComparer.OrdinalIgnoreCase);
 
             var accounts = await _db.GetAccountsAsync();
             var transactions = await _db.GetTransactionsAsync();
@@ -44,13 +46,9 @@ public partial class MultiCurrencyViewModel : BaseViewModel
 
             decimal totalInBase = 0;
             foreach (var acc in accounts)
-            {
                 totalInBase += await _rates.ConvertAsync(acc.InitialBalance, acc.Currency, baseCurrency);
-            }
             foreach (var t in transactions)
-            {
                 totalInBase += await _rates.ConvertAsync(t.Amount, t.Currency, baseCurrency);
-            }
 
             Balances.Clear();
             foreach (var code in displayCurrencies)
@@ -61,8 +59,10 @@ public partial class MultiCurrencyViewModel : BaseViewModel
 
             var cached = await _rates.GetCachedRatesAsync(baseCurrency);
             Rates.Clear();
-            foreach (var r in cached.Where(r => r.TargetCurrency != r.BaseCurrency)
-                                    .OrderBy(r => r.TargetCurrency))
+            foreach (var r in cached
+                .Where(r => r.TargetCurrency != r.BaseCurrency
+                         && displaySet.Contains(r.TargetCurrency))
+                .OrderBy(r => r.TargetCurrency))
             {
                 Rates.Add(new RateDisplay
                 {
@@ -78,6 +78,7 @@ public partial class MultiCurrencyViewModel : BaseViewModel
                 ? last.Value.ToLocalTime().ToString("yyyy-MM-dd HH:mm")
                 : "никогда";
         }
+        catch { /* best-effort — pull-to-refresh never gets stuck */ }
         finally
         {
             IsBusy = false;
@@ -87,18 +88,15 @@ public partial class MultiCurrencyViewModel : BaseViewModel
     [RelayCommand]
     public async Task RefreshRatesAsync()
     {
-        if (IsBusy) return;
         IsBusy = true;
         try
         {
             var settings = await _db.GetSettingsAsync();
             var ok = await _rates.RefreshRatesAsync(settings.BaseCurrency);
-            if (!ok && Application.Current?.MainPage is not null)
-            {
-                await Application.Current.MainPage.DisplayAlert("Курсы", "Не удалось обновить. Проверьте интернет.", "OK");
-            }
             await LoadAsync();
+            if (!ok) await ShowAlertAsync("Курсы", "Не удалось обновить. Проверьте интернет.");
         }
+        catch { }
         finally
         {
             IsBusy = false;
@@ -106,9 +104,16 @@ public partial class MultiCurrencyViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task CreateAccountAsync()
+    private async Task CreateAccountAsync() => await Shell.Current.GoToAsync(nameof(AccountsPage));
+
+    private static async Task ShowAlertAsync(string title, string body)
     {
-        await Shell.Current.GoToAsync(nameof(AccountsPage));
+        try
+        {
+            if (Application.Current?.Windows.Count > 0 && Application.Current.Windows[0].Page is not null)
+                await Application.Current.Windows[0].Page!.DisplayAlertAsync(title, body, "OK");
+        }
+        catch { }
     }
 }
 

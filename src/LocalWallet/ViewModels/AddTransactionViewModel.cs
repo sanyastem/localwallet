@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LocalWallet.Models;
+using LocalWallet.Services;
 using LocalWallet.Services.Database;
 using LocalWallet.Services.ExchangeRates;
 using LocalWallet.ViewModels.Base;
@@ -12,6 +13,7 @@ public partial class AddTransactionViewModel : BaseViewModel
 {
     private readonly IDatabaseService _db;
     private readonly IExchangeRateService _rates;
+    private readonly IEntityWriter _writer;
 
     [ObservableProperty] private ObservableCollection<Account> accounts = new();
     [ObservableProperty] private ObservableCollection<Category> categories = new();
@@ -38,10 +40,11 @@ public partial class AddTransactionViewModel : BaseViewModel
     [RelayCommand] private void SetExpense() => IsExpense = true;
     [RelayCommand] private void SetIncome() => IsExpense = false;
 
-    public AddTransactionViewModel(IDatabaseService db, IExchangeRateService rates)
+    public AddTransactionViewModel(IDatabaseService db, IExchangeRateService rates, IEntityWriter writer)
     {
         _db = db;
         _rates = rates;
+        _writer = writer;
         Title = "Новая операция";
     }
 
@@ -98,13 +101,14 @@ public partial class AddTransactionViewModel : BaseViewModel
         {
             AccountId = SelectedAccount.Id,
             CategoryId = SelectedCategory.Id,
+            FamilyId = SelectedAccount.FamilyId,
             Amount = signedAmount,
             Currency = currency,
             Date = Date.ToUniversalTime(),
             Note = Note,
             ExchangeRateToBase = rate
         };
-        await _db.SaveTransactionAsync(transaction);
+        await _writer.SaveTransactionAsync(transaction);
         await Shell.Current.GoToAsync("..");
     }
 

@@ -292,5 +292,5 @@ public class SyncService : ISyncService
         return (type, json);
     }
 
-    public static int SuggestedPort() => DefaultPort;
+    public static int SuggestedPort() => PreferredPort;
 }

@@ -59,7 +59,11 @@ public partial class AccountsViewModel : BaseViewModel
             Items.Clear();
             foreach (var a in list) Items.Add(a);
         }
-        catch { }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[Accounts.Load] {ex}");
+            await UiAlerts.ShowAsync("Счета", $"Не удалось загрузить: {ex.Message}");
+        }
     }
 
     [RelayCommand]

@@ -76,7 +76,19 @@ public partial class TransactionsViewModel : BaseViewModel
     [RelayCommand]
     private async Task AddAsync()
     {
-        try { if (Shell.Current is not null) await Shell.Current.GoToAsync(nameof(AddTransactionPage)); }
-        catch { }
+        try
+        {
+            if (Shell.Current is null)
+            {
+                await UiAlerts.ShowAsync("Навигация", "Не удалось открыть форму операции.");
+                return;
+            }
+            await Shell.Current.GoToAsync(nameof(AddTransactionPage));
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[Transactions.Add] {ex}");
+            await UiAlerts.ShowAsync("Ошибка навигации", ex.Message);
+        }
     }
 }

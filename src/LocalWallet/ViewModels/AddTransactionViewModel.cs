@@ -135,7 +135,14 @@ public partial class AddTransactionViewModel : BaseViewModel
 
     private static async Task SafeBackAsync()
     {
-        try { if (Shell.Current is not null) await Shell.Current.GoToAsync(".."); }
-        catch { }
+        try
+        {
+            if (Shell.Current is null) return;
+            await Shell.Current.GoToAsync("..");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[AddTransaction.SafeBack] {ex}");
+        }
     }
 }

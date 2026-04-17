@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LocalWallet.Models;
+using LocalWallet.Services;
 using LocalWallet.Services.Database;
 using LocalWallet.Services.ExchangeRates;
 using LocalWallet.ViewModels.Base;
@@ -87,17 +88,28 @@ public partial class DashboardViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task AddTransactionAsync()
-    {
-        try { if (Shell.Current is not null) await Shell.Current.GoToAsync(nameof(AddTransactionPage)); }
-        catch { }
-    }
+    private async Task AddTransactionAsync() => await NavigateAsync(nameof(AddTransactionPage));
 
     [RelayCommand]
-    private async Task CreateAccountAsync()
+    private async Task CreateAccountAsync() => await NavigateAsync(nameof(AccountsPage));
+
+    private static async Task NavigateAsync(string route)
     {
-        try { if (Shell.Current is not null) await Shell.Current.GoToAsync(nameof(AccountsPage)); }
-        catch { }
+        try
+        {
+            if (Shell.Current is null)
+            {
+                System.Diagnostics.Debug.WriteLine($"[Dashboard.Navigate] Shell.Current is null for {route}");
+                await UiAlerts.ShowAsync("Навигация", $"Не удалось открыть '{route}'.");
+                return;
+            }
+            await Shell.Current.GoToAsync(route);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[Dashboard.Navigate] {route}: {ex}");
+            await UiAlerts.ShowAsync("Ошибка навигации", ex.Message);
+        }
     }
 }
 

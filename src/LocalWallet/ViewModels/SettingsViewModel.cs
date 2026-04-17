@@ -78,12 +78,17 @@ public partial class SettingsViewModel : BaseViewModel
             BiometricEnabled = s.BiometricEnabled && BiometricAvailable;
             LastRatesUpdateText = s.LastRatesUpdate?.ToLocalTime().ToString("yyyy-MM-dd HH:mm") ?? "никогда";
 
-            try { await _identity.InitializeAsync(); } catch { }
+            try { await _identity.InitializeAsync(); }
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"[Settings.Load.Identity] {ex}"); }
             DeviceDisplayName = string.IsNullOrWhiteSpace(_identity.DisplayName) ? "Моё устройство" : _identity.DisplayName;
             var id = _identity.DeviceId ?? string.Empty;
             DeviceIdShort = id.Length > 12 ? id[..12] + "…" : id;
         }
-        catch { /* settings page must never crash */ }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[Settings.Load] {ex}");
+            await UiAlerts.ShowAsync("Настройки", $"Не удалось загрузить: {ex.Message}");
+        }
     }
 
     [RelayCommand]
@@ -222,8 +227,18 @@ public partial class SettingsViewModel : BaseViewModel
     {
         try
         {
-            if (Shell.Current is not null) await Shell.Current.GoToAsync(route);
+            if (Shell.Current is null)
+            {
+                System.Diagnostics.Debug.WriteLine($"[SafeNavigate] Shell.Current is null for {route}");
+                await UiAlerts.ShowAsync("Навигация", $"Не удалось открыть '{route}'.");
+                return;
+            }
+            await Shell.Current.GoToAsync(route);
         }
-        catch { }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[SafeNavigate] {route}: {ex}");
+            await UiAlerts.ShowAsync("Ошибка навигации", ex.Message);
+        }
     }
 }

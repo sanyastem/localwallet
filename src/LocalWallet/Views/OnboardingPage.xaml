@@ -5,86 +5,96 @@
              xmlns:m="clr-namespace:LocalWallet.Models"
              x:Class="LocalWallet.Views.OnboardingPage"
              x:DataType="vm:OnboardingViewModel"
+             BackgroundColor="Transparent"
              Shell.NavBarIsVisible="False"
              Title="Добро пожаловать">
 
-    <Grid RowDefinitions="Auto,*,Auto" Padding="20" RowSpacing="16">
+    <Grid Background="{StaticResource AmbientBg}">
+        <Grid RowDefinitions="Auto,*,Auto" Padding="20,20,20,24" RowSpacing="14">
 
-        <VerticalStackLayout Grid.Row="0" Spacing="6">
-            <Label Text="Добро пожаловать в LocalWallet"
-                   FontSize="24" FontAttributes="Bold" />
-            <Label Text="Настройте валюты и безопасность за одну минуту"
-                   FontSize="14" TextColor="{StaticResource Gray500}" />
-        </VerticalStackLayout>
+            <Border Grid.Row="0"
+                    Background="{StaticResource AccentBg}"
+                    Stroke="{StaticResource GlassStroke}"
+                    StrokeThickness="1"
+                    Padding="20">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="26" />
+                </Border.StrokeShape>
+                <Border.Shadow>
+                    <Shadow Brush="Black" Opacity="0.18" Radius="16" Offset="0,8" />
+                </Border.Shadow>
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="Добро пожаловать в LocalWallet" FontSize="22" FontAttributes="Bold" TextColor="White" />
+                    <Label Text="Настройте валюты и безопасность за одну минуту" FontSize="13" TextColor="#CCFFFFFF" />
+                </VerticalStackLayout>
+            </Border>
 
-        <ScrollView Grid.Row="1">
-            <VerticalStackLayout Spacing="18">
+            <ScrollView Grid.Row="1">
+                <VerticalStackLayout Spacing="14">
 
-                <Border Style="{StaticResource Card}">
-                    <VerticalStackLayout Spacing="8">
-                        <Label Text="Базовая валюта" FontSize="16" FontAttributes="Bold" />
-                        <Label Text="Общий баланс будет считаться в ней"
-                               FontSize="12" TextColor="{StaticResource Gray500}" />
-                        <Picker ItemsSource="{Binding AvailableCurrencies}"
-                                SelectedItem="{Binding SelectedBaseCurrency, Mode=TwoWay}"
-                                ItemDisplayBinding="{Binding Display}"
-                                Title="Выберите валюту" />
-                    </VerticalStackLayout>
-                </Border>
-
-                <Border Style="{StaticResource Card}">
-                    <VerticalStackLayout Spacing="8">
-                        <Label Text="Отображаемые валюты" FontSize="16" FontAttributes="Bold" />
-                        <Label Text="Баланс будет показан во всех выбранных"
-                               FontSize="12" TextColor="{StaticResource Gray500}" />
-                        <CollectionView ItemsSource="{Binding DisplayChoices}"
-                                        SelectionMode="None"
-                                        HeightRequest="320">
-                            <CollectionView.ItemTemplate>
-                                <DataTemplate x:DataType="vm:CurrencyChoice">
-                                    <Grid Padding="4,8" ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                                        <Label Grid.Column="0"
-                                               Text="{Binding Currency.Display}"
-                                               VerticalOptions="Center" />
-                                        <CheckBox Grid.Column="1"
-                                                  IsChecked="{Binding IsSelected, Mode=TwoWay}"
-                                                  Color="{StaticResource Primary}"
-                                                  VerticalOptions="Center" />
-                                    </Grid>
-                                </DataTemplate>
-                            </CollectionView.ItemTemplate>
-                        </CollectionView>
-                    </VerticalStackLayout>
-                </Border>
-
-                <Border Style="{StaticResource Card}"
-                        IsVisible="{Binding BiometricAvailable}">
-                    <Grid ColumnDefinitions="*,Auto">
-                        <VerticalStackLayout Grid.Column="0" Spacing="4">
-                            <Label Text="Биометрический вход" FontSize="16" FontAttributes="Bold" />
-                            <Label Text="Отпечаток / лицо при запуске приложения"
-                                   FontSize="12" TextColor="{StaticResource Gray500}" />
+                    <Border Style="{StaticResource GlassCard}">
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="Базовая валюта" Style="{StaticResource H2}" />
+                            <Label Text="Общий баланс будет считаться в ней" Style="{StaticResource Caption}" />
+                            <Border Style="{StaticResource GlassInput}">
+                                <Picker ItemsSource="{Binding AvailableCurrencies}"
+                                        BackgroundColor="Transparent"
+                                        SelectedItem="{Binding SelectedBaseCurrency, Mode=TwoWay}"
+                                        ItemDisplayBinding="{Binding Display}"
+                                        Title="Выберите валюту" />
+                            </Border>
                         </VerticalStackLayout>
-                        <Switch Grid.Column="1"
-                                IsToggled="{Binding BiometricEnabled, Mode=TwoWay}"
-                                OnColor="{StaticResource Primary}"
-                                VerticalOptions="Center" />
-                    </Grid>
-                </Border>
+                    </Border>
 
-                <Label Text="{Binding StatusText}"
-                       IsVisible="{Binding IsBusy}"
-                       FontSize="13"
-                       TextColor="{StaticResource Gray500}"
-                       HorizontalOptions="Center" />
+                    <Border Style="{StaticResource GlassCard}">
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="Отображаемые валюты" Style="{StaticResource H2}" />
+                            <Label Text="Баланс будет показан во всех выбранных" Style="{StaticResource Caption}" />
+                            <CollectionView ItemsSource="{Binding DisplayChoices}"
+                                            SelectionMode="None"
+                                            HeightRequest="320">
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:CurrencyChoice">
+                                        <Grid Padding="4,8" ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                            <Label Grid.Column="0" Text="{Binding Currency.Display}" VerticalOptions="Center" />
+                                            <CheckBox Grid.Column="1"
+                                                      IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                                      Color="{StaticResource AccentGreen}"
+                                                      VerticalOptions="Center" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
+                        </VerticalStackLayout>
+                    </Border>
 
-            </VerticalStackLayout>
-        </ScrollView>
+                    <Border Style="{StaticResource GlassCard}" IsVisible="{Binding BiometricAvailable}">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                <Label Text="Биометрический вход" Style="{StaticResource H2}" />
+                                <Label Text="Отпечаток / лицо при запуске приложения" Style="{StaticResource Caption}" />
+                            </VerticalStackLayout>
+                            <Switch Grid.Column="1"
+                                    IsToggled="{Binding BiometricEnabled, Mode=TwoWay}"
+                                    OnColor="{StaticResource AccentGreen}"
+                                    VerticalOptions="Center" />
+                        </Grid>
+                    </Border>
 
-        <Button Grid.Row="2"
-                Text="Начать"
-                Command="{Binding FinishCommand}"
-                IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBool}}" />
+                    <Label Text="{Binding StatusText}"
+                           IsVisible="{Binding IsBusy}"
+                           Style="{StaticResource Caption}"
+                           HorizontalOptions="Center" />
 
+                </VerticalStackLayout>
+            </ScrollView>
+
+            <Button Grid.Row="2"
+                    Text="Начать"
+                    Style="{StaticResource GlassPrimary}"
+                    Command="{Binding FinishCommand}"
+                    IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBool}}" />
+
+        </Grid>
     </Grid>
 </ContentPage>

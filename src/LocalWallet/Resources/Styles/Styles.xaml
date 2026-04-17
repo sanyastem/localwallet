@@ -89,7 +89,10 @@
         <Setter Property="Shell.DisabledColor" Value="{StaticResource Gray300}" />
         <Setter Property="Shell.UnselectedColor" Value="#B0D7B2" />
         <Setter Property="Shell.NavBarHasShadow" Value="False" />
-        <Setter Property="Shell.TabBarBackgroundColor" Value="{AppThemeBinding Light=White, Dark=#151515}" />
+        <!-- Warmer neutrals that read as "glass over the ambient gradient"
+             instead of a flat slab. True translucent tabbar isn't supported
+             natively in MAUI Shell; this is the cheapest high-fidelity hint. -->
+        <Setter Property="Shell.TabBarBackgroundColor" Value="{AppThemeBinding Light=#F8FAFA, Dark=#0F1110}" />
         <Setter Property="Shell.TabBarForegroundColor" Value="{StaticResource Primary}" />
         <Setter Property="Shell.TabBarTitleColor" Value="{StaticResource Primary}" />
         <Setter Property="Shell.TabBarUnselectedColor" Value="{StaticResource Gray500}" />

@@ -18,10 +18,12 @@ public partial class JoinFamilyViewModel : BaseViewModel
     private readonly IFamilyCryptoService _crypto;
 
     [ObservableProperty] private string inviteJson = string.Empty;
-    [ObservableProperty] private string status = "Вставьте JSON приглашения из QR-кода";
+    [ObservableProperty] private string status = "Наведите камеру на QR-код приглашения";
     [ObservableProperty] private string sas = string.Empty;
     [ObservableProperty] private string peerDisplayName = string.Empty;
     [ObservableProperty] private bool sasVisible;
+    [ObservableProperty] private bool isScanning;
+    [ObservableProperty] private string scanHint = "Наведите камеру на QR-код";
 
     private InvitationPayload? _invite;
     private PairingClientSession? _session;
@@ -48,6 +50,13 @@ public partial class JoinFamilyViewModel : BaseViewModel
             if (!string.IsNullOrWhiteSpace(text)) InviteJson = text;
         }
         catch { }
+    }
+
+    public async Task HandleScannedTextAsync(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return;
+        InviteJson = text.Trim();
+        await ConnectAsync();
     }
 
     [RelayCommand]

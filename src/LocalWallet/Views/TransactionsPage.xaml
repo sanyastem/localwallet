@@ -4,72 +4,97 @@
              xmlns:vm="clr-namespace:LocalWallet.ViewModels"
              x:Class="LocalWallet.Views.TransactionsPage"
              x:DataType="vm:TransactionsViewModel"
+             BackgroundColor="Transparent"
              Title="Операции">
 
-    <Grid RowDefinitions="Auto,*" Padding="16" RowSpacing="8">
+    <Grid Background="{StaticResource AmbientBg}">
+        <Grid RowDefinitions="Auto,*" Padding="16,12,16,0" RowSpacing="10">
 
-        <Grid Grid.Row="0" ColumnDefinitions="*,*" ColumnSpacing="8">
-            <VerticalStackLayout Grid.Column="0">
-                <Label Text="С" FontSize="12" TextColor="{StaticResource Gray500}" />
-                <DatePicker Date="{Binding FromDate, Mode=TwoWay}" />
-            </VerticalStackLayout>
-            <VerticalStackLayout Grid.Column="1">
-                <Label Text="По" FontSize="12" TextColor="{StaticResource Gray500}" />
-                <DatePicker Date="{Binding ToDate, Mode=TwoWay}" />
-            </VerticalStackLayout>
+            <Border Grid.Row="0" Style="{StaticResource GlassCard}" Padding="14,12">
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                    <VerticalStackLayout Grid.Column="0" Spacing="2">
+                        <Label Text="С" Style="{StaticResource Caption}" />
+                        <DatePicker Date="{Binding FromDate, Mode=TwoWay}" />
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Column="1" Spacing="2">
+                        <Label Text="По" Style="{StaticResource Caption}" />
+                        <DatePicker Date="{Binding ToDate, Mode=TwoWay}" />
+                    </VerticalStackLayout>
+                </Grid>
+            </Border>
+
+            <RefreshView Grid.Row="1"
+                         IsRefreshing="{Binding IsBusy, Mode=TwoWay}"
+                         Command="{Binding LoadCommand}">
+                <CollectionView ItemsSource="{Binding Items}" VerticalScrollBarVisibility="Never">
+                    <CollectionView.EmptyView>
+                        <Border Style="{StaticResource GlassCard}" Margin="0,32">
+                            <VerticalStackLayout Spacing="6" HorizontalOptions="Center">
+                                <Label Text="📒" FontSize="36" HorizontalOptions="Center" />
+                                <Label Text="Пусто за этот период" Style="{StaticResource H2}" HorizontalOptions="Center" />
+                                <Label Text="Добавьте первую операцию, нажав +."
+                                       Style="{StaticResource Caption}"
+                                       HorizontalTextAlignment="Center" />
+                            </VerticalStackLayout>
+                        </Border>
+                    </CollectionView.EmptyView>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="vm:TransactionDisplay">
+                            <SwipeView Margin="0,5">
+                                <SwipeView.RightItems>
+                                    <SwipeItems>
+                                        <SwipeItem Text="Удалить"
+                                                   BackgroundColor="{StaticResource DangerRed}"
+                                                   Command="{Binding Source={RelativeSource AncestorType={x:Type vm:TransactionsViewModel}}, Path=DeleteCommand}"
+                                                   CommandParameter="{Binding .}" />
+                                    </SwipeItems>
+                                </SwipeView.RightItems>
+                                <Border Style="{StaticResource GlassRow}">
+                                    <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="10">
+                                        <Label Grid.Row="0" Grid.Column="0"
+                                               Text="{Binding CategoryName}"
+                                               FontSize="15"
+                                               FontAttributes="Bold" />
+                                        <Label Grid.Row="1" Grid.Column="0" Style="{StaticResource Caption}">
+                                            <Label.Text>
+                                                <MultiBinding StringFormat="{}{0:dd.MM.yyyy HH:mm} · {1}">
+                                                    <Binding Path="Date" />
+                                                    <Binding Path="AccountName" />
+                                                </MultiBinding>
+                                            </Label.Text>
+                                        </Label>
+                                        <Label Grid.Row="0" Grid.RowSpan="2" Grid.Column="1"
+                                               Text="{Binding AmountFormatted}"
+                                               TextColor="{Binding AmountColor}"
+                                               FontSize="15"
+                                               VerticalOptions="Center"
+                                               FontAttributes="Bold" />
+                                    </Grid>
+                                </Border>
+                            </SwipeView>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </RefreshView>
+
         </Grid>
 
-        <RefreshView Grid.Row="1"
-                     IsRefreshing="{Binding IsBusy}"
-                     Command="{Binding LoadCommand}">
-            <CollectionView ItemsSource="{Binding Items}">
-                <CollectionView.EmptyView>
-                    <Label Text="Ничего не найдено за период"
-                           HorizontalOptions="Center"
-                           VerticalOptions="Center"
-                           TextColor="{StaticResource Gray500}" />
-                </CollectionView.EmptyView>
-                <CollectionView.ItemTemplate>
-                    <DataTemplate x:DataType="vm:TransactionDisplay">
-                        <SwipeView>
-                            <SwipeView.RightItems>
-                                <SwipeItems>
-                                    <SwipeItem Text="Удалить"
-                                               BackgroundColor="#D32F2F"
-                                               Command="{Binding Source={RelativeSource AncestorType={x:Type vm:TransactionsViewModel}}, Path=DeleteCommand}"
-                                               CommandParameter="{Binding .}" />
-                                </SwipeItems>
-                            </SwipeView.RightItems>
-                            <Grid Padding="12,10" ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
-                                <Label Grid.Row="0" Grid.Column="0"
-                                       Text="{Binding CategoryName}" FontAttributes="Bold" />
-                                <Label Grid.Row="1" Grid.Column="0"
-                                       FontSize="12" TextColor="{StaticResource Gray500}">
-                                    <Label.Text>
-                                        <MultiBinding StringFormat="{}{0:dd.MM.yyyy HH:mm} · {1}">
-                                            <Binding Path="Date" />
-                                            <Binding Path="AccountName" />
-                                        </MultiBinding>
-                                    </Label.Text>
-                                </Label>
-                                <Label Grid.Row="0" Grid.RowSpan="2" Grid.Column="1"
-                                       Text="{Binding AmountFormatted}"
-                                       TextColor="{Binding AmountColor}"
-                                       VerticalOptions="Center"
-                                       FontAttributes="Bold" />
-                            </Grid>
-                        </SwipeView>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
-        </RefreshView>
-
-        <Button Grid.Row="1"
-                Text="+"
-                Style="{StaticResource Fab}"
+        <Button Text="+"
+                FontSize="28"
+                FontAttributes="Bold"
+                WidthRequest="60" HeightRequest="60"
+                MinimumHeightRequest="60" MinimumWidthRequest="60"
+                CornerRadius="30"
+                Padding="0"
+                BackgroundColor="{StaticResource AccentGreen}"
+                TextColor="White"
                 HorizontalOptions="End"
                 VerticalOptions="End"
-                Margin="0,0,8,16"
-                Command="{Binding AddCommand}" />
+                Margin="0,0,20,24"
+                Command="{Binding AddCommand}">
+            <Button.Shadow>
+                <Shadow Brush="Black" Opacity="0.25" Radius="14" Offset="0,6" />
+            </Button.Shadow>
+        </Button>
     </Grid>
 </ContentPage>

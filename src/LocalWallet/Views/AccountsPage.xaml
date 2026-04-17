@@ -5,96 +5,103 @@
              xmlns:m="clr-namespace:LocalWallet.Models"
              x:Class="LocalWallet.Views.AccountsPage"
              x:DataType="vm:AccountsViewModel"
+             BackgroundColor="Transparent"
              Title="Счета">
 
-    <Grid RowDefinitions="Auto,*" Padding="16" RowSpacing="14">
+    <Grid Background="{StaticResource AmbientBg}">
+        <Grid RowDefinitions="Auto,*" Padding="16,12,16,0" RowSpacing="14">
 
-        <Border Grid.Row="0" Style="{StaticResource Card}">
-            <VerticalStackLayout Spacing="10">
-                <Label Text="Новый счёт" Style="{StaticResource SectionHeader}" />
+            <Border Grid.Row="0" Style="{StaticResource GlassCard}">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Новый счёт" Style="{StaticResource H2}" />
 
-                <VerticalStackLayout Spacing="4">
-                    <Label Text="Название" Style="{StaticResource FieldLabel}" />
-                    <Border Style="{StaticResource InputWrap}">
+                    <Label Text="Название" Style="{StaticResource Caption}" />
+                    <Border Style="{StaticResource GlassInput}">
                         <Entry Placeholder="Например: Кошелёк, Банк, Карта"
+                               BackgroundColor="Transparent"
                                Text="{Binding NewAccountName, Mode=TwoWay}" />
                     </Border>
-                </VerticalStackLayout>
 
-                <VerticalStackLayout Spacing="4">
-                    <Label Text="Валюта" Style="{StaticResource FieldLabel}" />
-                    <Border Style="{StaticResource InputWrap}">
+                    <Label Text="Валюта" Style="{StaticResource Caption}" />
+                    <Border Style="{StaticResource GlassInput}">
                         <Picker ItemsSource="{Binding AvailableCurrencies}"
+                                BackgroundColor="Transparent"
                                 SelectedItem="{Binding SelectedCurrency, Mode=TwoWay}"
                                 ItemDisplayBinding="{Binding Display}"
                                 Title="Выберите валюту" />
                     </Border>
-                </VerticalStackLayout>
 
-                <VerticalStackLayout Spacing="4">
-                    <Label Text="Область" Style="{StaticResource FieldLabel}" />
-                    <Border Style="{StaticResource InputWrap}">
+                    <Label Text="Область" Style="{StaticResource Caption}" />
+                    <Border Style="{StaticResource GlassInput}">
                         <Picker ItemsSource="{Binding AvailableScopes}"
+                                BackgroundColor="Transparent"
                                 SelectedItem="{Binding SelectedScope, Mode=TwoWay}"
                                 ItemDisplayBinding="{Binding Label}"
                                 Title="Личный или семейный" />
                     </Border>
-                </VerticalStackLayout>
 
-                <VerticalStackLayout Spacing="4">
-                    <Label Text="Начальный баланс" Style="{StaticResource FieldLabel}" />
-                    <Border Style="{StaticResource InputWrap}">
+                    <Label Text="Начальный баланс" Style="{StaticResource Caption}" />
+                    <Border Style="{StaticResource GlassInput}">
                         <Entry Placeholder="0.00"
+                               BackgroundColor="Transparent"
                                Text="{Binding NewAccountInitialBalance, Mode=TwoWay}"
                                Keyboard="Numeric" />
                     </Border>
+
+                    <Button Text="Добавить счёт" Style="{StaticResource GlassPrimary}" Command="{Binding AddCommand}" Margin="0,4,0,0" />
                 </VerticalStackLayout>
+            </Border>
 
-                <Button Text="Добавить счёт" Command="{Binding AddCommand}" Margin="0,4,0,0" />
-            </VerticalStackLayout>
-        </Border>
+            <CollectionView Grid.Row="1" ItemsSource="{Binding Items}" SelectionMode="None" VerticalScrollBarVisibility="Never">
+                <CollectionView.EmptyView>
+                    <Border Style="{StaticResource GlassCard}" Margin="0,20">
+                        <VerticalStackLayout Spacing="6" HorizontalOptions="Center">
+                            <Label Text="💼" FontSize="36" HorizontalOptions="Center" />
+                            <Label Text="Пока нет счетов" Style="{StaticResource H2}" HorizontalOptions="Center" />
+                            <Label Text="Создайте первый счёт в форме выше."
+                                   Style="{StaticResource Caption}"
+                                   HorizontalTextAlignment="Center" />
+                        </VerticalStackLayout>
+                    </Border>
+                </CollectionView.EmptyView>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="m:Account">
+                        <SwipeView Margin="0,5">
+                            <SwipeView.RightItems>
+                                <SwipeItems>
+                                    <SwipeItem Text="Удалить"
+                                               BackgroundColor="{StaticResource DangerRed}"
+                                               Command="{Binding Source={RelativeSource AncestorType={x:Type vm:AccountsViewModel}}, Path=DeleteCommand}"
+                                               CommandParameter="{Binding .}" />
+                                </SwipeItems>
+                            </SwipeView.RightItems>
+                            <Border Style="{StaticResource GlassRow}">
+                                <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="10">
+                                    <Label Grid.Row="0" Grid.Column="0"
+                                           Text="{Binding Name}"
+                                           FontAttributes="Bold"
+                                           FontSize="15" />
+                                    <Label Grid.Row="1" Grid.Column="0"
+                                           Text="{Binding Currency}"
+                                           Style="{StaticResource Caption}" />
+                                    <Label Grid.Row="0" Grid.RowSpan="2" Grid.Column="1"
+                                           VerticalOptions="Center"
+                                           FontAttributes="Bold"
+                                           FontSize="15">
+                                        <Label.Text>
+                                            <MultiBinding StringFormat="{}{0:0.00} {1}">
+                                                <Binding Path="InitialBalance" />
+                                                <Binding Path="Currency" />
+                                            </MultiBinding>
+                                        </Label.Text>
+                                    </Label>
+                                </Grid>
+                            </Border>
+                        </SwipeView>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
 
-        <CollectionView Grid.Row="1" ItemsSource="{Binding Items}" SelectionMode="None">
-            <CollectionView.EmptyView>
-                <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Padding="20" Spacing="6">
-                    <Label Text="Пока нет счетов" FontSize="14" TextColor="{StaticResource Gray500}" HorizontalOptions="Center" />
-                    <Label Text="Создайте первый выше" FontSize="12" TextColor="{StaticResource Gray500}" HorizontalOptions="Center" />
-                </VerticalStackLayout>
-            </CollectionView.EmptyView>
-            <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="m:Account">
-                    <SwipeView Margin="0,4">
-                        <SwipeView.RightItems>
-                            <SwipeItems>
-                                <SwipeItem Text="Удалить"
-                                           BackgroundColor="#D32F2F"
-                                           Command="{Binding Source={RelativeSource AncestorType={x:Type vm:AccountsViewModel}}, Path=DeleteCommand}"
-                                           CommandParameter="{Binding .}" />
-                            </SwipeItems>
-                        </SwipeView.RightItems>
-                        <Border Style="{StaticResource Card}" Padding="14">
-                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="10">
-                                <Label Grid.Row="0" Grid.Column="0"
-                                       Text="{Binding Name}" FontAttributes="Bold" FontSize="16" />
-                                <Label Grid.Row="1" Grid.Column="0"
-                                       Text="{Binding Currency}" FontSize="12"
-                                       TextColor="{StaticResource Gray500}" />
-                                <Label Grid.Row="0" Grid.RowSpan="2" Grid.Column="1"
-                                       VerticalOptions="Center"
-                                       FontAttributes="Bold" FontSize="16">
-                                    <Label.Text>
-                                        <MultiBinding StringFormat="{}{0:0.00} {1}">
-                                            <Binding Path="InitialBalance" />
-                                            <Binding Path="Currency" />
-                                        </MultiBinding>
-                                    </Label.Text>
-                                </Label>
-                            </Grid>
-                        </Border>
-                    </SwipeView>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
-
+        </Grid>
     </Grid>
 </ContentPage>

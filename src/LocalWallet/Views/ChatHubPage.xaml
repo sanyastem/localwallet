@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:LocalWallet.ViewModels"
+             xmlns:m="clr-namespace:LocalWallet.Models"
+             x:Class="LocalWallet.Views.ChatHubPage"
+             x:DataType="vm:ChatHubViewModel"
+             BackgroundColor="Transparent"
+             Style="{StaticResource AppPage}"
+             Title="Чат">
+
+    <Grid Background="{StaticResource AmbientBg}">
+        <ScrollView>
+            <VerticalStackLayout Padding="16,12,16,96" Spacing="14">
+
+                <!-- No families -->
+                <Border Style="{StaticResource GlassCard}"
+                        IsVisible="{Binding HasFamilies, Converter={StaticResource InverseBool}}">
+                    <VerticalStackLayout Spacing="10" HorizontalOptions="Center" Padding="6">
+                        <Label Text="💬" FontSize="44" HorizontalOptions="Center" />
+                        <Label Text="Пока не с кем переписываться"
+                               Style="{StaticResource H1}"
+                               HorizontalOptions="Center"
+                               HorizontalTextAlignment="Center" />
+                        <Label Text="Чат работает только внутри семьи и только по локальной Wi-Fi сети. Создайте семью и пригласите второе устройство по QR — переписка сразу заработает."
+                               Style="{StaticResource Caption}"
+                               HorizontalTextAlignment="Center" />
+                        <Button Text="Создать семью"
+                                Style="{StaticResource GlassPrimary}"
+                                Command="{Binding CreateFamilyCommand}"
+                                HorizontalOptions="Center"
+                                MinimumWidthRequest="220"
+                                Margin="0,4,0,0" />
+                        <Button Text="Присоединиться по QR"
+                                Style="{StaticResource GlassSecondary}"
+                                Command="{Binding JoinFamilyCommand}"
+                                HorizontalOptions="Center"
+                                MinimumWidthRequest="220" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Multiple families: pick one -->
+                <VerticalStackLayout IsVisible="{Binding HasMultiple}" Spacing="10">
+                    <Label Text="Выберите семью" Style="{StaticResource H2}" />
+                    <CollectionView ItemsSource="{Binding Items}" SelectionMode="None" HeightRequest="420">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="m:Family">
+                                <Border Style="{StaticResource GlassRow}" Margin="0,5">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ChatHubViewModel}}, Path=OpenChatCommand}"
+                                                              CommandParameter="{Binding .}" />
+                                    </Border.GestureRecognizers>
+                                    <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="10">
+                                        <Label Grid.Row="0" Grid.Column="0" Text="{Binding Name}" FontAttributes="Bold" FontSize="16" />
+                                        <Label Grid.Row="1" Grid.Column="0" Text="{Binding Role}" Style="{StaticResource Caption}" />
+                                        <Label Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" Text="›" FontSize="22" TextColor="{StaticResource TextSecondaryLight}" VerticalOptions="Center" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

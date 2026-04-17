@@ -6,10 +6,11 @@
              x:Class="LocalWallet.Views.CategoriesPage"
              x:DataType="vm:CategoriesViewModel"
              BackgroundColor="Transparent"
+             Style="{StaticResource AppPage}"
              Title="Категории">
 
     <Grid Background="{StaticResource AmbientBg}">
-        <Grid RowDefinitions="Auto,*" Padding="16,12,16,0" RowSpacing="14">
+        <Grid RowDefinitions="Auto,*" Padding="16,12,16,100" RowSpacing="14">
 
             <Border Grid.Row="0" Style="{StaticResource GlassCard}">
                 <VerticalStackLayout Spacing="10">

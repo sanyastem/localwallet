@@ -26,6 +26,10 @@ public static class MauiProgram
                 fonts.AddFont("MaterialIcons-Regular.ttf", "MatIcon");
             });
 
+#if ANDROID
+        Platforms.Android.LiquidGlassBlur.Configure();
+#endif
+
 #if DEBUG
         builder.Logging.AddDebug();
 #endif
@@ -69,6 +73,7 @@ public static class MauiProgram
         builder.Services.AddTransient<InviteViewModel>();
         builder.Services.AddTransient<JoinFamilyViewModel>();
         builder.Services.AddTransient<ChatViewModel>();
+        builder.Services.AddTransient<ChatHubViewModel>();
 
         // Pages
         builder.Services.AddTransient<LockPage>();
@@ -86,6 +91,7 @@ public static class MauiProgram
         builder.Services.AddTransient<InvitePage>();
         builder.Services.AddTransient<JoinFamilyPage>();
         builder.Services.AddTransient<ChatPage>();
+        builder.Services.AddTransient<ChatHubPage>();
 
         return builder.Build();
     }

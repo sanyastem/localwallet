@@ -5,10 +5,11 @@
              x:Class="LocalWallet.Views.DashboardPage"
              x:DataType="vm:DashboardViewModel"
              BackgroundColor="Transparent"
+             Style="{StaticResource AppPage}"
              Title="Главная">
 
     <Grid Background="{StaticResource AmbientBg}">
-        <Grid RowDefinitions="Auto,*" Padding="16,12,16,0" RowSpacing="14">
+        <Grid RowDefinitions="Auto,*" Padding="16,12,16,96" RowSpacing="14">
 
             <!-- Hero: balance card. Accent gradient + specular edge. -->
             <Border Grid.Row="0"
@@ -132,7 +133,7 @@
                 TextColor="White"
                 HorizontalOptions="End"
                 VerticalOptions="End"
-                Margin="0,0,20,24"
+                Margin="0,0,20,110"
                 IsVisible="{Binding HasAccounts}"
                 Command="{Binding AddTransactionCommand}">
             <Button.Shadow>

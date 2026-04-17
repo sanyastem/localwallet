@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+    Global ContentPage chrome: every page renders its Content then has
+    the floating Liquid-Glass tab bar overlaid at the bottom via AbsoluteLayout,
+    so the bar is truly floating and content can scroll under the blurred
+    backdrop (matching iOS 26 behaviour).
+
+    Pages that shouldn't have the tab bar (OnboardingPage, LockPage, modal
+    flows) opt out by clearing their ControlTemplate.
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:LocalWallet.Controls">
+
+    <ControlTemplate x:Key="AppPageTemplate">
+        <AbsoluteLayout>
+            <ContentPresenter
+                AbsoluteLayout.LayoutFlags="All"
+                AbsoluteLayout.LayoutBounds="0,0,1,1" />
+            <controls:AppTabBar
+                AbsoluteLayout.LayoutFlags="PositionProportional,WidthProportional"
+                AbsoluteLayout.LayoutBounds="0.5,1,1,AutoSize" />
+        </AbsoluteLayout>
+    </ControlTemplate>
+
+    <!-- Opt-in: pages apply this style when they want the floating tab bar.
+         We don't use an implicit style because many flows (Onboarding, Lock,
+         focused modals like AddTransaction/Invite/Join) need to be chrome-free. -->
+    <Style x:Key="AppPage" TargetType="ContentPage">
+        <Setter Property="ControlTemplate" Value="{StaticResource AppPageTemplate}" />
+    </Style>
+
+</ResourceDictionary>

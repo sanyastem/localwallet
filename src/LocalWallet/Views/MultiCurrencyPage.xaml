@@ -5,10 +5,11 @@
              x:Class="LocalWallet.Views.MultiCurrencyPage"
              x:DataType="vm:MultiCurrencyViewModel"
              BackgroundColor="Transparent"
+             Style="{StaticResource AppPage}"
              Title="Валюты">
 
     <Grid Background="{StaticResource AmbientBg}">
-        <Grid RowDefinitions="*,Auto" Padding="16,12,16,14" RowSpacing="10">
+        <Grid RowDefinitions="*,Auto" Padding="16,12,16,100" RowSpacing="10">
 
             <RefreshView Grid.Row="0"
                          IsRefreshing="{Binding IsBusy, Mode=TwoWay}"

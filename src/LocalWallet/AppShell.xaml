@@ -4,44 +4,27 @@
        xmlns:views="clr-namespace:LocalWallet.Views"
        x:Class="LocalWallet.AppShell"
        Shell.FlyoutBehavior="Disabled"
+       Shell.TabBarIsVisible="False"
        Title="LocalWallet">
 
+    <!-- Five routed pages; Shell's native bottom bar is hidden and our
+         Liquid-Glass AppTabBar floats over each page via AppPageTemplate. -->
     <TabBar>
         <ShellContent Title="Главная"
                       ContentTemplate="{DataTemplate views:DashboardPage}"
-                      Route="dashboard">
-            <ShellContent.Icon>
-                <FontImageSource FontFamily="MatIcon" Glyph="&#xe88a;" />
-            </ShellContent.Icon>
-        </ShellContent>
+                      Route="dashboard" />
         <ShellContent Title="Операции"
                       ContentTemplate="{DataTemplate views:TransactionsPage}"
-                      Route="transactions">
-            <ShellContent.Icon>
-                <FontImageSource FontFamily="MatIcon" Glyph="&#xe8b0;" />
-            </ShellContent.Icon>
-        </ShellContent>
+                      Route="transactions" />
         <ShellContent Title="Валюты"
                       ContentTemplate="{DataTemplate views:MultiCurrencyPage}"
-                      Route="multicurrency">
-            <ShellContent.Icon>
-                <FontImageSource FontFamily="MatIcon" Glyph="&#xe8d4;" />
-            </ShellContent.Icon>
-        </ShellContent>
-        <ShellContent Title="Статистика"
-                      ContentTemplate="{DataTemplate views:StatisticsPage}"
-                      Route="statistics">
-            <ShellContent.Icon>
-                <FontImageSource FontFamily="MatIcon" Glyph="&#xe6c4;" />
-            </ShellContent.Icon>
-        </ShellContent>
+                      Route="multicurrency" />
+        <ShellContent Title="Чат"
+                      ContentTemplate="{DataTemplate views:ChatHubPage}"
+                      Route="chat" />
         <ShellContent Title="Настройки"
                       ContentTemplate="{DataTemplate views:SettingsPage}"
-                      Route="settings">
-            <ShellContent.Icon>
-                <FontImageSource FontFamily="MatIcon" Glyph="&#xe8b8;" />
-            </ShellContent.Icon>
-        </ShellContent>
+                      Route="settings" />
     </TabBar>
 
 </Shell>

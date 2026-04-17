@@ -6,11 +6,12 @@
              x:Class="LocalWallet.Views.StatisticsPage"
              x:DataType="vm:StatisticsViewModel"
              BackgroundColor="Transparent"
+             Style="{StaticResource AppPage}"
              Title="Статистика">
 
     <Grid Background="{StaticResource AmbientBg}">
         <ScrollView>
-            <VerticalStackLayout Padding="16,12,16,24" Spacing="14">
+            <VerticalStackLayout Padding="16,12,16,110" Spacing="14">
 
                 <Border Style="{StaticResource GlassCard}" Padding="14,12">
                     <VerticalStackLayout Spacing="10">

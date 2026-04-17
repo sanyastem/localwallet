@@ -6,11 +6,12 @@
              x:Class="LocalWallet.Views.SettingsPage"
              x:DataType="vm:SettingsViewModel"
              BackgroundColor="Transparent"
+             Style="{StaticResource AppPage}"
              Title="Настройки">
 
     <Grid Background="{StaticResource AmbientBg}">
         <ScrollView>
-            <VerticalStackLayout Padding="16,12,16,24" Spacing="14">
+            <VerticalStackLayout Padding="16,12,16,110" Spacing="14">
 
                 <!-- Currencies -->
                 <Border Style="{StaticResource GlassCard}">

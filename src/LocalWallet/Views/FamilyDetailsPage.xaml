@@ -6,11 +6,12 @@
              x:Class="LocalWallet.Views.FamilyDetailsPage"
              x:DataType="vm:FamilyDetailsViewModel"
              BackgroundColor="Transparent"
+             Style="{StaticResource AppPage}"
              Title="Семья">
 
     <Grid Background="{StaticResource AmbientBg}">
         <ScrollView>
-            <VerticalStackLayout Padding="16,12,16,24" Spacing="14">
+            <VerticalStackLayout Padding="16,12,16,110" Spacing="14">
 
                 <!-- Hero summary -->
                 <Border Style="{StaticResource GlassCard}">

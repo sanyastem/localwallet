@@ -3,7 +3,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:LocalWallet.ViewModels"
              xmlns:m="clr-namespace:LocalWallet.Models"
-             xmlns:s="clr-namespace:LocalWallet.Services.Sync"
              x:Class="LocalWallet.Views.FamilyDetailsPage"
              x:DataType="vm:FamilyDetailsViewModel"
              Title="Семья">
@@ -39,45 +38,10 @@
 
             <BoxView HeightRequest="1" Color="{StaticResource Gray300}" />
 
-            <Grid ColumnDefinitions="*,Auto">
-                <Label Grid.Column="0" Text="Устройства поблизости" Style="{StaticResource SectionHeader}" />
-                <Button Grid.Column="1" Text="Обновить" Style="{StaticResource Secondary}" Command="{Binding RefreshPeersCommand}" />
-            </Grid>
+            <Label Text="Синхронизация" Style="{StaticResource SectionHeader}" />
+            <Label Text="Укажите IP и порт устройства-участника (пока без автообнаружения)"
+                   Style="{StaticResource FieldLabel}" />
 
-            <Border Style="{StaticResource Card}" Padding="0">
-                <CollectionView ItemsSource="{Binding DiscoveredPeers}" SelectionMode="None" HeightRequest="160">
-                    <CollectionView.EmptyView>
-                        <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Padding="20" Spacing="4">
-                            <Label Text="Устройства не найдены" FontSize="13" TextColor="{StaticResource Gray500}" HorizontalOptions="Center" />
-                            <Label Text="Убедитесь, что оба телефона в одной сети" FontSize="11" TextColor="{StaticResource Gray500}" HorizontalOptions="Center" />
-                        </VerticalStackLayout>
-                    </CollectionView.EmptyView>
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate x:DataType="s:DiscoveredPeer">
-                            <Grid Padding="14,10" ColumnDefinitions="*,Auto">
-                                <VerticalStackLayout Grid.Column="0" Spacing="2">
-                                    <Label Text="{Binding DisplayName}" FontAttributes="Bold" />
-                                    <Label FontSize="11" TextColor="{StaticResource Gray500}">
-                                        <Label.Text>
-                                            <MultiBinding StringFormat="{}{0}:{1}">
-                                                <Binding Path="Host" />
-                                                <Binding Path="Port" />
-                                            </MultiBinding>
-                                        </Label.Text>
-                                    </Label>
-                                </VerticalStackLayout>
-                                <Button Grid.Column="1"
-                                        Text="Sync"
-                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:FamilyDetailsViewModel}}, Path=SyncWithPeerCommand}"
-                                        CommandParameter="{Binding .}"
-                                        Style="{StaticResource Secondary}" />
-                            </Grid>
-                        </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                </CollectionView>
-            </Border>
-
-            <Label Text="Вручную" Style="{StaticResource FieldLabel}" />
             <Grid ColumnDefinitions="2*,*" ColumnSpacing="8">
                 <Border Grid.Column="0" Style="{StaticResource InputWrap}">
                     <Entry Placeholder="IP" Text="{Binding PeerHost, Mode=TwoWay}" />
@@ -86,7 +50,7 @@
                     <Entry Placeholder="Port" Text="{Binding PeerPort, Mode=TwoWay}" Keyboard="Numeric" />
                 </Border>
             </Grid>
-            <Button Text="Синхронизировать вручную" Command="{Binding SyncManualCommand}" Style="{StaticResource Secondary}" />
+            <Button Text="Синхронизировать" Command="{Binding SyncManualCommand}" />
 
             <Label Text="{Binding Status}" FontSize="12" TextColor="{StaticResource Gray500}" />
 

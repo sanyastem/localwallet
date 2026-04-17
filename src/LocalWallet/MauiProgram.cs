@@ -49,7 +49,6 @@ public static class MauiProgram
         builder.Services.AddSingleton<IEventStore, EventStore>();
         builder.Services.AddSingleton<ISyncService, SyncService>();
         builder.Services.AddSingleton<IEntityWriter, EntityWriter>();
-        builder.Services.AddSingleton<ILanDiscoveryService, LanDiscoveryService>();
 
         // ViewModels
         builder.Services.AddTransient<DashboardViewModel>();

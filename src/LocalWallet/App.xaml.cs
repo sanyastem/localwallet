@@ -59,13 +59,8 @@ public partial class App : Application
 
             try
             {
-                var identity = _services.GetRequiredService<IDeviceIdentityService>();
                 var sync = _services.GetRequiredService<ISyncService>();
-                var lan = _services.GetRequiredService<ILanDiscoveryService>();
-
-                var port = await sync.StartListenerAsync();
-                var didShort = identity.DeviceId.Length > 8 ? identity.DeviceId[..8] : identity.DeviceId;
-                await lan.StartAsync(didShort, identity.DisplayName, port);
+                await sync.StartListenerAsync();
             }
             catch { /* P2P boot is best-effort */ }
         }

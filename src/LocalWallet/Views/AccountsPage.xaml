@@ -32,6 +32,16 @@
                 </VerticalStackLayout>
 
                 <VerticalStackLayout Spacing="4">
+                    <Label Text="Область" Style="{StaticResource FieldLabel}" />
+                    <Border Style="{StaticResource InputWrap}">
+                        <Picker ItemsSource="{Binding AvailableScopes}"
+                                SelectedItem="{Binding SelectedScope, Mode=TwoWay}"
+                                ItemDisplayBinding="{Binding Label}"
+                                Title="Личный или семейный" />
+                    </Border>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="4">
                     <Label Text="Начальный баланс" Style="{StaticResource FieldLabel}" />
                     <Border Style="{StaticResource InputWrap}">
                         <Entry Placeholder="0.00"

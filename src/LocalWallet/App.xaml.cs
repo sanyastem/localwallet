@@ -1,6 +1,7 @@
 using LocalWallet.Services.Crypto;
 using LocalWallet.Services.Database;
 using LocalWallet.Services.ExchangeRates;
+using LocalWallet.Services.Sync;
 using LocalWallet.Views;
 
 namespace LocalWallet;
@@ -55,6 +56,18 @@ public partial class App : Application
                 try { await rates.RefreshRatesAsync(settings.BaseCurrency); }
                 catch { /* best-effort */ }
             }
+
+            try
+            {
+                var identity = _services.GetRequiredService<IDeviceIdentityService>();
+                var sync = _services.GetRequiredService<ISyncService>();
+                var lan = _services.GetRequiredService<ILanDiscoveryService>();
+
+                var port = await sync.StartListenerAsync();
+                var didShort = identity.DeviceId.Length > 8 ? identity.DeviceId[..8] : identity.DeviceId;
+                await lan.StartAsync(didShort, identity.DisplayName, port);
+            }
+            catch { /* P2P boot is best-effort */ }
         }
         catch
         {

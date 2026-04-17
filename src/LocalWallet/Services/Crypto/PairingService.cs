@@ -28,7 +28,20 @@ public class PairingService : IPairingService
 {
     private const int SessionKeyLen = 32;
     private const int SasRawLen = 4;
-    private static readonly KeyAgreementAlgorithm Kex = KeyAgreementAlgorithm.X25519;
+    // Lazy so that a broken libsodium load doesn't blow up the type initializer
+    // (which would kill DI resolution of every page that transitively depends on
+    // this service).
+    private static readonly Lazy<KeyAgreementAlgorithm?> KexLazy = new(() =>
+    {
+        try { return KeyAgreementAlgorithm.X25519; }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[Pairing] NSec unavailable: {ex}");
+            return null;
+        }
+    });
+    private static KeyAgreementAlgorithm Kex =>
+        KexLazy.Value ?? throw new InvalidOperationException("Pairing: crypto unavailable on this device.");
     private static readonly byte[] Info = Encoding.UTF8.GetBytes("localwallet.pairing.v1");
 
     public EphemeralKeypair CreateEphemeralKeypair()

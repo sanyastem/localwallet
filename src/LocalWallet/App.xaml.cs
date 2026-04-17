@@ -134,9 +134,15 @@ public partial class App : Application
         if (ex is null) return;
         try
         {
+            var root = ex;
+            while (root.InnerException is not null) root = root.InnerException;
+            var message = ReferenceEquals(root, ex)
+                ? ex.Message
+                : $"{ex.GetType().Name}: {root.Message}";
+
             _ = MainThread.InvokeOnMainThreadAsync(async () =>
             {
-                try { await Services.UiAlerts.ShowAsync("Ошибка", ex.Message); } catch { }
+                try { await Services.UiAlerts.ShowAsync("Ошибка", message); } catch { }
             });
         }
         catch { }

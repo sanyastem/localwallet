@@ -114,9 +114,13 @@ public partial class JoinFamilyViewModel : BaseViewModel
             var peerSalt = Convert.FromBase64String(hostHello.SaltBase64);
             PeerDisplayName = hostHello.DisplayName;
 
-            var combined = new byte[mySalt.Length + peerSalt.Length];
-            Buffer.BlockCopy(mySalt, 0, combined, 0, mySalt.Length);
-            Buffer.BlockCopy(peerSalt, 0, combined, mySalt.Length, peerSalt.Length);
+            var combined = new byte[peerSalt.Length + mySalt.Length];
+            // Salt order must be canonical: host-salt first, joiner-salt second
+            // on BOTH sides. The host (InviteViewModel) concats its own salt first,
+            // so the joiner has to invert — otherwise HKDF derives a different
+            // session key on each side and SAS codes don't match.
+            Buffer.BlockCopy(peerSalt, 0, combined, 0, peerSalt.Length);
+            Buffer.BlockCopy(mySalt, 0, combined, peerSalt.Length, mySalt.Length);
 
             var result = _pairing.DeriveSession(eph, peerPub, combined);
             _session.SessionKey = result.SessionKey;

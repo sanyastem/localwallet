@@ -4,17 +4,15 @@
              xmlns:vm="clr-namespace:LocalWallet.ViewModels"
              x:Class="LocalWallet.Views.ChatPage"
              x:DataType="vm:ChatViewModel"
+             BackgroundColor="Transparent"
              Title="{Binding FamilyName}">
 
-    <Grid RowDefinitions="Auto,*,Auto" RowSpacing="0">
+    <Grid Background="{StaticResource AmbientBg}">
+        <Grid RowDefinitions="Auto,*,Auto" RowSpacing="0">
 
-        <Border Grid.Row="0"
-                BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceAlt}, Dark={StaticResource SurfaceAltDark}}"
-                Stroke="Transparent"
-                Padding="16,8">
-            <Grid ColumnDefinitions="*,Auto">
-                <Label Grid.Column="0" VerticalOptions="Center" FontSize="13"
-                       TextColor="{StaticResource Gray500}">
+            <!-- Status strip: number of peers + LAN chip -->
+            <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Padding="18,10,18,8">
+                <Label Grid.Column="0" VerticalOptions="Center" Style="{StaticResource Caption}">
                     <Label.Text>
                         <MultiBinding StringFormat="В сети: {0}">
                             <Binding Path="OnlinePeersCount" />
@@ -22,91 +20,97 @@
                     </Label.Text>
                 </Label>
                 <Border Grid.Column="1"
-                        StrokeShape="RoundRectangle 8"
-                        BackgroundColor="#2E7D32"
-                        Padding="8,3"
+                        Style="{StaticResource GlassChip}"
                         IsVisible="{Binding OnlinePeersCount, Converter={StaticResource CountToVisible}}">
-                    <Label Text="LAN" TextColor="White" FontSize="11" FontAttributes="Bold" />
+                    <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
+                        <Ellipse WidthRequest="6" HeightRequest="6" Fill="#2E7D32" VerticalOptions="Center" />
+                        <Label Text="LAN" Style="{StaticResource CaptionBold}" VerticalOptions="Center" />
+                    </HorizontalStackLayout>
                 </Border>
             </Grid>
-        </Border>
 
-        <RefreshView Grid.Row="1"
-                     IsRefreshing="{Binding IsBusy, Mode=TwoWay}"
-                     Command="{Binding LoadCommand}">
-            <CollectionView ItemsSource="{Binding Messages}"
-                            SelectionMode="None"
-                            x:Name="MessageList"
-                            ItemsUpdatingScrollMode="KeepLastItemInView"
-                            VerticalScrollBarVisibility="Never">
-                <CollectionView.EmptyView>
-                    <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Padding="24" Spacing="6">
-                        <Label Text="Здесь пока пусто"
-                               FontSize="16" FontAttributes="Bold"
-                               HorizontalOptions="Center" />
-                        <Label Text="Напишите первое сообщение — оно дойдёт до устройств семьи в этой Wi-Fi сети."
-                               FontSize="13" TextColor="{StaticResource Gray500}"
-                               HorizontalTextAlignment="Center" />
-                    </VerticalStackLayout>
-                </CollectionView.EmptyView>
-                <CollectionView.ItemTemplate>
-                    <DataTemplate x:DataType="vm:ChatBubble">
-                        <Grid Padding="12,4" ColumnDefinitions="Auto,*">
-                            <Border Grid.Column="0"
-                                    IsVisible="{Binding ShowAvatar}"
-                                    WidthRequest="36" HeightRequest="36"
-                                    StrokeShape="RoundRectangle 18"
-                                    Stroke="Transparent"
-                                    BackgroundColor="{Binding AvatarBg}"
-                                    VerticalOptions="End"
-                                    Margin="0,0,8,0">
-                                <Label Text="{Binding Initials}"
-                                       TextColor="White"
-                                       FontAttributes="Bold"
-                                       FontSize="13"
-                                       HorizontalOptions="Center"
-                                       VerticalOptions="Center" />
-                            </Border>
-                            <Border Grid.Column="1"
-                                    HorizontalOptions="{Binding BubbleAlignment}"
-                                    StrokeShape="RoundRectangle 16"
-                                    Stroke="Transparent"
-                                    BackgroundColor="{Binding BubbleBg}"
-                                    Padding="12,8"
-                                    MaximumWidthRequest="320">
-                                <VerticalStackLayout Spacing="2">
-                                    <Label Text="{Binding AuthorName}"
-                                           FontSize="11"
+            <!-- Messages -->
+            <RefreshView Grid.Row="1"
+                         IsRefreshing="{Binding IsBusy, Mode=TwoWay}"
+                         Command="{Binding LoadCommand}">
+                <CollectionView ItemsSource="{Binding Messages}"
+                                SelectionMode="None"
+                                x:Name="MessageList"
+                                ItemsUpdatingScrollMode="KeepLastItemInView"
+                                VerticalScrollBarVisibility="Never">
+                    <CollectionView.EmptyView>
+                        <Border Style="{StaticResource GlassCard}"
+                                Margin="24,40"
+                                VerticalOptions="Center">
+                            <VerticalStackLayout Spacing="10" HorizontalOptions="Center">
+                                <Label Text="💬" FontSize="42" HorizontalOptions="Center" />
+                                <Label Text="Здесь пока пусто" Style="{StaticResource H2}" HorizontalOptions="Center" />
+                                <Label Text="Напишите первое сообщение — оно дойдёт до устройств семьи в этой Wi-Fi сети."
+                                       Style="{StaticResource Caption}"
+                                       HorizontalTextAlignment="Center" />
+                            </VerticalStackLayout>
+                        </Border>
+                    </CollectionView.EmptyView>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="vm:ChatBubble">
+                            <Grid Padding="14,4" ColumnDefinitions="Auto,*">
+                                <Border Grid.Column="0"
+                                        IsVisible="{Binding ShowAvatar}"
+                                        WidthRequest="34" HeightRequest="34"
+                                        Stroke="Transparent"
+                                        BackgroundColor="{Binding AvatarBg}"
+                                        VerticalOptions="End"
+                                        Margin="0,0,8,0">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="17" />
+                                    </Border.StrokeShape>
+                                    <Label Text="{Binding Initials}"
+                                           TextColor="White"
                                            FontAttributes="Bold"
-                                           TextColor="{Binding MetaFg}"
-                                           IsVisible="{Binding ShowAvatar}" />
-                                    <Label Text="{Binding Text}"
-                                           TextColor="{Binding BubbleFg}"
-                                           FontSize="15"
-                                           LineBreakMode="WordWrap" />
-                                    <Label Text="{Binding TimeFormatted}"
-                                           FontSize="10"
-                                           TextColor="{Binding MetaFg}"
-                                           HorizontalOptions="End" />
-                                </VerticalStackLayout>
-                            </Border>
-                        </Grid>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
-        </RefreshView>
+                                           FontSize="13"
+                                           HorizontalOptions="Center"
+                                           VerticalOptions="Center" />
+                                </Border>
+                                <Border Grid.Column="1"
+                                        HorizontalOptions="{Binding BubbleAlignment}"
+                                        Stroke="{Binding BubbleStroke}"
+                                        StrokeThickness="1"
+                                        BackgroundColor="{Binding BubbleBg}"
+                                        Padding="14,10"
+                                        MaximumWidthRequest="300">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="20" />
+                                    </Border.StrokeShape>
+                                    <VerticalStackLayout Spacing="2">
+                                        <Label Text="{Binding AuthorName}"
+                                               FontSize="11"
+                                               FontAttributes="Bold"
+                                               TextColor="{Binding MetaFg}"
+                                               IsVisible="{Binding ShowAvatar}" />
+                                        <Label Text="{Binding Text}"
+                                               TextColor="{Binding BubbleFg}"
+                                               FontSize="15"
+                                               LineBreakMode="WordWrap" />
+                                        <Label Text="{Binding TimeFormatted}"
+                                               FontSize="10"
+                                               TextColor="{Binding MetaFg}"
+                                               HorizontalOptions="End" />
+                                    </VerticalStackLayout>
+                                </Border>
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </RefreshView>
 
-        <Border Grid.Row="2"
-                BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
-                Stroke="{AppThemeBinding Light={StaticResource Outline}, Dark={StaticResource OutlineDark}}"
-                StrokeThickness="1"
-                Padding="10">
-            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                <Border Grid.Column="0" Style="{StaticResource InputWrap}">
+            <!-- Composer -->
+            <Grid Grid.Row="2" ColumnDefinitions="*,Auto" ColumnSpacing="10" Padding="12,8,12,14">
+                <Border Grid.Column="0" Style="{StaticResource GlassInput}" Padding="14,2">
                     <Editor Placeholder="Сообщение"
                             Text="{Binding Draft, Mode=TwoWay}"
                             AutoSize="TextChanges"
                             MaximumHeightRequest="120"
+                            BackgroundColor="Transparent"
                             FontSize="15" />
                 </Border>
                 <Button Grid.Column="1"
@@ -116,11 +120,15 @@
                         MinimumHeightRequest="50" MinimumWidthRequest="50"
                         CornerRadius="25"
                         Padding="0"
-                        BackgroundColor="{StaticResource Primary}"
+                        BackgroundColor="{StaticResource AccentGreen}"
                         TextColor="White"
-                        Command="{Binding SendCommand}" />
+                        Command="{Binding SendCommand}">
+                    <Button.Shadow>
+                        <Shadow Brush="Black" Opacity="0.2" Radius="10" Offset="0,4" />
+                    </Button.Shadow>
+                </Button>
             </Grid>
-        </Border>
 
+        </Grid>
     </Grid>
 </ContentPage>

@@ -11,8 +11,8 @@
 
 		<ApplicationTitle>LocalWallet</ApplicationTitle>
 		<ApplicationId>com.sanyastem.localwallet</ApplicationId>
-		<ApplicationDisplayVersion>2.4.1</ApplicationDisplayVersion>
-		<ApplicationVersion>22</ApplicationVersion>
+		<ApplicationDisplayVersion>2.5.0</ApplicationDisplayVersion>
+		<ApplicationVersion>23</ApplicationVersion>
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">24.0</SupportedOSPlatformVersion>
 	</PropertyGroup>

@@ -65,7 +65,10 @@ public partial class OnboardingViewModel : BaseViewModel
             try { BiometricAvailable = await _biometric.IsAvailableAsync(); } catch { BiometricAvailable = false; }
             BiometricEnabled = s.BiometricEnabled && BiometricAvailable;
         }
-        catch { /* never crash onboarding */ }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[Onboarding.Load] {ex}");
+        }
     }
 
     [RelayCommand]
@@ -106,11 +109,17 @@ public partial class OnboardingViewModel : BaseViewModel
             catch { ratesOk = false; }
             StatusText = ratesOk ? "Готово" : "Курсы не загрузились — обновим позже";
 
-            UiAlerts.TrySetRootPage(new AppShell());
+            if (!UiAlerts.TrySetRootPage(new AppShell()))
+            {
+                StatusText = "Не удалось открыть главный экран.";
+                await UiAlerts.ShowAsync("Онбординг", "Не удалось переключиться на главный экран.");
+            }
         }
-        catch
+        catch (Exception ex)
         {
+            System.Diagnostics.Debug.WriteLine($"[Onboarding.Finish] {ex}");
             StatusText = "Ошибка. Попробуйте ещё раз.";
+            await UiAlerts.ShowAsync("Онбординг", ex.Message);
         }
         finally
         {

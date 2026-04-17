@@ -101,18 +101,45 @@ public partial class App : Application
 
     private static void InstallGlobalExceptionHandlers()
     {
-        AppDomain.CurrentDomain.UnhandledException += (_, _) => { /* swallow — UI alerts handled locally */ };
-        TaskScheduler.UnobservedTaskException += (_, e) => { try { e.SetObserved(); } catch { } };
+        AppDomain.CurrentDomain.UnhandledException += (_, e) =>
+        {
+            try { System.Diagnostics.Debug.WriteLine($"[LocalWallet.Unhandled] {e.ExceptionObject}"); } catch { }
+            if (e.ExceptionObject is Exception ex) SurfaceErrorToUser(ex);
+        };
+        TaskScheduler.UnobservedTaskException += (_, e) =>
+        {
+            try { System.Diagnostics.Debug.WriteLine($"[LocalWallet.UnobservedTask] {e.Exception}"); } catch { }
+            SurfaceErrorToUser(e.Exception);
+            try { e.SetObserved(); } catch { }
+        };
 #if ANDROID
         try
         {
             Android.Runtime.AndroidEnvironment.UnhandledExceptionRaiser += (_, e) =>
             {
+                // v2.3.0 used to swallow these with e.Handled = true, leaving the UI
+                // in a broken state (black screens, dead buttons) without any feedback.
+                // Now we surface the error to the user AND keep the app alive.
+                try { System.Diagnostics.Debug.WriteLine($"[LocalWallet.AndroidUnhandled] {e.Exception}"); } catch { }
+                SurfaceErrorToUser(e.Exception);
                 try { e.Handled = true; } catch { }
             };
         }
         catch { }
 #endif
+    }
+
+    private static void SurfaceErrorToUser(Exception? ex)
+    {
+        if (ex is null) return;
+        try
+        {
+            _ = MainThread.InvokeOnMainThreadAsync(async () =>
+            {
+                try { await Services.UiAlerts.ShowAsync("Ошибка", ex.Message); } catch { }
+            });
+        }
+        catch { }
     }
 
     private static Page BuildSplash() =>

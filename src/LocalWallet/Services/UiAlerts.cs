@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 namespace LocalWallet.Services;
 
 public static class UiAlerts
@@ -7,12 +9,16 @@ public static class UiAlerts
         try
         {
             var page = Application.Current?.Windows?.FirstOrDefault()?.Page;
-            if (page is null) return;
+            if (page is null)
+            {
+                Debug.WriteLine($"[UiAlerts.ShowAsync] no page — {title}: {message}");
+                return;
+            }
             await page.DisplayAlertAsync(title, message, accept);
         }
-        catch
+        catch (Exception ex)
         {
-            // Never let a failed alert take the app down.
+            Debug.WriteLine($"[UiAlerts.ShowAsync] failed ({title}): {ex}");
         }
     }
 
@@ -21,11 +27,16 @@ public static class UiAlerts
         try
         {
             var page = Application.Current?.Windows?.FirstOrDefault()?.Page;
-            if (page is null) return false;
+            if (page is null)
+            {
+                Debug.WriteLine($"[UiAlerts.ConfirmAsync] no page — {title}: {message}");
+                return false;
+            }
             return await page.DisplayAlertAsync(title, message, accept, cancel);
         }
-        catch
+        catch (Exception ex)
         {
+            Debug.WriteLine($"[UiAlerts.ConfirmAsync] failed ({title}): {ex}");
             return false;
         }
     }
@@ -35,12 +46,17 @@ public static class UiAlerts
         try
         {
             var window = Application.Current?.Windows?.FirstOrDefault();
-            if (window is null) return false;
+            if (window is null)
+            {
+                Debug.WriteLine("[UiAlerts.TrySetRootPage] no window");
+                return false;
+            }
             window.Page = newPage;
             return true;
         }
-        catch
+        catch (Exception ex)
         {
+            Debug.WriteLine($"[UiAlerts.TrySetRootPage] failed: {ex}");
             return false;
         }
     }

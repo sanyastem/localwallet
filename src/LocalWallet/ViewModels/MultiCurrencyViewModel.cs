@@ -114,8 +114,20 @@ public partial class MultiCurrencyViewModel : BaseViewModel
     [RelayCommand]
     private async Task CreateAccountAsync()
     {
-        try { if (Shell.Current is not null) await Shell.Current.GoToAsync(nameof(AccountsPage)); }
-        catch { }
+        try
+        {
+            if (Shell.Current is null)
+            {
+                await UiAlerts.ShowAsync("Навигация", "Не удалось открыть счета.");
+                return;
+            }
+            await Shell.Current.GoToAsync(nameof(AccountsPage));
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[MultiCurrency.CreateAccount] {ex}");
+            await UiAlerts.ShowAsync("Ошибка навигации", ex.Message);
+        }
     }
 }
 

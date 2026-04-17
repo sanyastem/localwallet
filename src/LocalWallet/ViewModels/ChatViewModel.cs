@@ -194,9 +194,11 @@ public class ChatBubble
 
     public string TimeFormatted => SentLocal.ToString(SentLocal.Date == DateTime.Today ? "HH:mm" : "dd.MM HH:mm");
     public LayoutOptions BubbleAlignment => IsMine ? LayoutOptions.End : LayoutOptions.Start;
-    public Color BubbleBg => IsMine ? Color.FromArgb("#2E7D32") : Color.FromArgb("#F1F2F4");
-    public Color BubbleFg => IsMine ? Colors.White : Color.FromArgb("#1E1E1E");
-    public Color MetaFg => IsMine ? Color.FromArgb("#CCFFFFFF") : Color.FromArgb("#757575");
+    // Liquid-glass tinted surfaces. Mine = accent-tinted glass; other = neutral glass.
+    public Color BubbleBg => IsMine ? Color.FromArgb("#D9295F2E") : Color.FromArgb("#CCFFFFFF");
+    public Color BubbleFg => IsMine ? Colors.White : Color.FromArgb("#111714");
+    public Color BubbleStroke => IsMine ? Color.FromArgb("#33FFFFFF") : Color.FromArgb("#1A000000");
+    public Color MetaFg => IsMine ? Color.FromArgb("#CCFFFFFF") : Color.FromArgb("#627267");
     public bool ShowAvatar => !IsMine;
     public Color AvatarBg => Color.FromArgb("#66BB6A");
 }

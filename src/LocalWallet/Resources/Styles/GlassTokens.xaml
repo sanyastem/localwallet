@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+    Liquid-Glass-inspired design tokens.
+
+    Perf discipline:
+    - NO runtime blur (SKBlur, BackdropFilter etc.) — kills battery and framerate.
+    - Glass look is faked with: translucent fills, a thin specular top-to-bottom
+      border (LinearGradientBrush with white-alpha stops), soft drop shadow, and
+      generous corner radii. All static GPU resources.
+    - Gradients use 2 stops max. Shadows are declared once and reused.
+    - No Border nesting deeper than 2 levels to keep layout cheap.
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Palette: dark-green brand + glassy neutrals -->
+    <Color x:Key="AmbientTopLight">#E8F4EC</Color>
+    <Color x:Key="AmbientBottomLight">#F7F9F7</Color>
+    <Color x:Key="AmbientTopDark">#0E1A14</Color>
+    <Color x:Key="AmbientBottomDark">#0A1410</Color>
+
+    <Color x:Key="GlassSurfaceLight">#CCFFFFFF</Color>   <!-- 80% white -->
+    <Color x:Key="GlassSurfaceDark">#99181E1C</Color>    <!-- 60% near-black green -->
+    <Color x:Key="GlassSurfaceAltLight">#B3FFFFFF</Color> <!-- 70% -->
+    <Color x:Key="GlassSurfaceAltDark">#801E2622</Color>  <!-- 50% -->
+
+    <Color x:Key="GlassBorderLight">#40FFFFFF</Color>
+    <Color x:Key="GlassBorderDark">#33FFFFFF</Color>
+    <Color x:Key="GlassBorderBottomLight">#1A000000</Color>
+    <Color x:Key="GlassBorderBottomDark">#33000000</Color>
+
+    <Color x:Key="AccentGreen">#2E7D32</Color>
+    <Color x:Key="AccentGreenDeep">#1B5E20</Color>
+
+    <Color x:Key="TextPrimaryLight">#111714</Color>
+    <Color x:Key="TextPrimaryDark">#F2F6F3</Color>
+    <Color x:Key="TextSecondaryLight">#627267</Color>
+    <Color x:Key="TextSecondaryDark">#8FA094</Color>
+
+    <!-- Ambient page background — dim vertical gradient, cheap -->
+    <LinearGradientBrush x:Key="AmbientBg" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Offset="0" Color="{AppThemeBinding Light={StaticResource AmbientTopLight}, Dark={StaticResource AmbientTopDark}}" />
+        <GradientStop Offset="1" Color="{AppThemeBinding Light={StaticResource AmbientBottomLight}, Dark={StaticResource AmbientBottomDark}}" />
+    </LinearGradientBrush>
+
+    <!-- Brand accent used on hero balance card / primary buttons -->
+    <LinearGradientBrush x:Key="AccentBg" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Offset="0" Color="{StaticResource AccentGreen}" />
+        <GradientStop Offset="1" Color="{StaticResource AccentGreenDeep}" />
+    </LinearGradientBrush>
+
+    <!-- Specular edge: bright on top, soft on bottom. Static, GPU-cheap. -->
+    <LinearGradientBrush x:Key="GlassStroke" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Offset="0"
+                      Color="{AppThemeBinding Light={StaticResource GlassBorderLight}, Dark={StaticResource GlassBorderDark}}" />
+        <GradientStop Offset="1"
+                      Color="{AppThemeBinding Light={StaticResource GlassBorderBottomLight}, Dark={StaticResource GlassBorderBottomDark}}" />
+    </LinearGradientBrush>
+
+    <!-- Radii -->
+    <x:Double x:Key="RadiusM">18</x:Double>
+    <x:Double x:Key="RadiusL">22</x:Double>
+    <x:Double x:Key="RadiusXL">28</x:Double>
+
+    <!-- Typography scale -->
+    <Style TargetType="Label" x:Key="Display">
+        <Setter Property="FontSize" Value="36" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
+    </Style>
+    <Style TargetType="Label" x:Key="H1">
+        <Setter Property="FontSize" Value="26" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
+    </Style>
+    <Style TargetType="Label" x:Key="H2">
+        <Setter Property="FontSize" Value="20" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
+    </Style>
+    <Style TargetType="Label" x:Key="Body">
+        <Setter Property="FontSize" Value="15" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
+    </Style>
+    <Style TargetType="Label" x:Key="Caption">
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+    </Style>
+    <Style TargetType="Label" x:Key="CaptionBold">
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+    </Style>
+
+    <!-- Glass card: the workhorse. Use instead of legacy Card style. -->
+    <Style TargetType="Border" x:Key="GlassCard">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource GlassSurfaceLight}, Dark={StaticResource GlassSurfaceDark}}" />
+        <Setter Property="Stroke" Value="{StaticResource GlassStroke}" />
+        <Setter Property="StrokeThickness" Value="1" />
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="22" />
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Padding" Value="16" />
+        <Setter Property="Shadow">
+            <Setter.Value>
+                <Shadow Brush="Black" Opacity="0.08" Radius="16" Offset="0,6" />
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Softer variant without shadow for list rows and dense layouts. -->
+    <Style TargetType="Border" x:Key="GlassRow">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource GlassSurfaceAltLight}, Dark={StaticResource GlassSurfaceAltDark}}" />
+        <Setter Property="Stroke" Value="{StaticResource GlassStroke}" />
+        <Setter Property="StrokeThickness" Value="1" />
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="16" />
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Padding" Value="14,12" />
+    </Style>
+
+    <!-- Input pill, glass-like, no shadow to stay cheap -->
+    <Style TargetType="Border" x:Key="GlassInput">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource GlassSurfaceAltLight}, Dark={StaticResource GlassSurfaceAltDark}}" />
+        <Setter Property="Stroke" Value="{StaticResource GlassStroke}" />
+        <Setter Property="StrokeThickness" Value="1" />
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="14" />
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Padding" Value="12,2" />
+    </Style>
+
+    <!-- Primary accent button. No shadow (it lives on a glass card already). -->
+    <Style TargetType="Button" x:Key="GlassPrimary">
+        <Setter Property="BackgroundColor" Value="{StaticResource AccentGreen}" />
+        <Setter Property="TextColor" Value="White" />
+        <Setter Property="FontSize" Value="15" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="CornerRadius" Value="16" />
+        <Setter Property="Padding" Value="18,14" />
+        <Setter Property="MinimumHeightRequest" Value="50" />
+        <Setter Property="Shadow">
+            <Setter.Value>
+                <Shadow Brush="Black" Opacity="0.12" Radius="10" Offset="0,4" />
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Secondary glass button: translucent surface, strong text. -->
+    <Style TargetType="Button" x:Key="GlassSecondary">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource GlassSurfaceLight}, Dark={StaticResource GlassSurfaceDark}}" />
+        <Setter Property="TextColor" Value="{StaticResource AccentGreen}" />
+        <Setter Property="BorderColor" Value="{StaticResource AccentGreen}" />
+        <Setter Property="BorderWidth" Value="1.2" />
+        <Setter Property="FontSize" Value="15" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="CornerRadius" Value="16" />
+        <Setter Property="Padding" Value="18,14" />
+        <Setter Property="MinimumHeightRequest" Value="50" />
+    </Style>
+
+    <!-- Global ambient background for ContentPages. Opt-in per-page via
+         BackgroundColor="Transparent" on the page + root Grid Background="{StaticResource AmbientBg}".
+         We don't force it via an implicit ContentPage Style because some screens
+         (OnboardingPage hero) still use their own gradients. -->
+
+    <!-- Pill chip for tags / online badges -->
+    <Style TargetType="Border" x:Key="GlassChip">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource GlassSurfaceLight}, Dark={StaticResource GlassSurfaceDark}}" />
+        <Setter Property="Stroke" Value="{StaticResource GlassStroke}" />
+        <Setter Property="StrokeThickness" Value="1" />
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="12" />
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Padding" Value="10,4" />
+    </Style>
+
+</ResourceDictionary>

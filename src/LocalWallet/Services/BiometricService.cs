@@ -13,18 +13,31 @@ public class BiometricService : IBiometricService
 {
     public async Task<bool> IsAvailableAsync()
     {
-        var available = await CrossFingerprint.Current.IsAvailableAsync(allowAlternativeAuthentication: true);
-        return available;
+        try
+        {
+            return await CrossFingerprint.Current.IsAvailableAsync(allowAlternativeAuthentication: true);
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     public async Task<bool> AuthenticateAsync(string reason)
     {
-        var request = new AuthenticationRequestConfiguration("LocalWallet", reason)
+        try
         {
-            AllowAlternativeAuthentication = true,
-            CancelTitle = "Отмена"
-        };
-        var result = await CrossFingerprint.Current.AuthenticateAsync(request);
-        return result.Authenticated;
+            var request = new AuthenticationRequestConfiguration("LocalWallet", reason)
+            {
+                AllowAlternativeAuthentication = true,
+                CancelTitle = "Отмена"
+            };
+            var result = await CrossFingerprint.Current.AuthenticateAsync(request);
+            return result.Authenticated;
+        }
+        catch
+        {
+            return false;
+        }
     }
 }

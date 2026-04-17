@@ -1,5 +1,8 @@
+using System.Text.Json;
+using LocalWallet.Models;
 using LocalWallet.Services.Crypto;
 using LocalWallet.Services.Database;
+using LocalWallet.Services.Sync;
 
 namespace LocalWallet.Services.Families;
 
@@ -10,12 +13,14 @@ public class FamilyService : IFamilyService
     private readonly IDatabaseService _db;
     private readonly IDeviceIdentityService _identity;
     private readonly IFamilyCryptoService _crypto;
+    private readonly IEventStore _events;
 
-    public FamilyService(IDatabaseService db, IDeviceIdentityService identity, IFamilyCryptoService crypto)
+    public FamilyService(IDatabaseService db, IDeviceIdentityService identity, IFamilyCryptoService crypto, IEventStore events)
     {
         _db = db;
         _identity = identity;
         _crypto = crypto;
+        _events = events;
     }
 
     public Task<List<Models.Family>> ListAsync() => _db.GetFamiliesAsync();
@@ -117,6 +122,21 @@ public class FamilyService : IFamilyService
             if (role == "Owner") existing.Role = "Owner";
             await _db.SaveFamilyMemberAsync(existing);
         }
+    }
+
+    public async Task RevokeMemberAsync(Guid familyId, string deviceId)
+    {
+        var family = await _db.GetFamilyAsync(familyId);
+        if (family is null || family.Role != "Owner") return;
+        if (string.Equals(deviceId, _identity.DeviceId, StringComparison.Ordinal)) return;
+
+        var key = await GetFamilyKeyAsync(familyId);
+        if (key is null) return;
+
+        var payload = JsonSerializer.SerializeToUtf8Bytes(new MemberRevokePayload(deviceId));
+        await _events.AppendLocalAsync(
+            new EventDraft(familyId, EntityType.Member, Guid.NewGuid(), EventOperation.Delete, payload),
+            key);
     }
 
     private static async Task StoreFamilyKeyAsync(Guid familyId, byte[] key)

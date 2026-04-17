@@ -29,7 +29,6 @@ public partial class DashboardViewModel : BaseViewModel
     [RelayCommand]
     public async Task LoadAsync()
     {
-        if (IsBusy) return;
         IsBusy = true;
         try
         {
@@ -77,6 +76,7 @@ public partial class DashboardViewModel : BaseViewModel
             }
 
         }
+        catch { /* keep PTR unstuck */ }
         finally
         {
             IsBusy = false;

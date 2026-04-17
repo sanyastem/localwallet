@@ -23,6 +23,9 @@ public class Projector : IProjector
             case EntityType.Category:
                 await ProjectCategoryAsync(ev, plaintextPayload);
                 break;
+            case EntityType.Member:
+                await ProjectMemberAsync(ev, plaintextPayload);
+                break;
         }
     }
 
@@ -74,6 +77,21 @@ public class Projector : IProjector
         await _db.SaveCategoryAsync(decoded);
     }
 
+    private async Task ProjectMemberAsync(SyncEvent ev, byte[] payload)
+    {
+        if (ev.Operation == EventOperation.Delete)
+        {
+            var p = JsonSerializer.Deserialize<MemberRevokePayload>(payload);
+            if (string.IsNullOrWhiteSpace(p?.DeviceId)) return;
+            var member = await _db.FindFamilyMemberAsync(ev.FamilyId, p.DeviceId);
+            if (member is not null && member.RevokedAt is null)
+            {
+                member.RevokedAt = ev.CreatedAt;
+                await _db.SaveFamilyMemberAsync(member);
+            }
+        }
+    }
+
     private static bool IsOlderOrEqual(SyncEvent ev, long currentClock, string? currentAuthor)
     {
         if (ev.LamportClock < currentClock) return true;
@@ -81,3 +99,5 @@ public class Projector : IProjector
         return string.CompareOrdinal(ev.AuthorDeviceId, currentAuthor ?? string.Empty) <= 0;
     }
 }
+
+public record MemberRevokePayload(string DeviceId);

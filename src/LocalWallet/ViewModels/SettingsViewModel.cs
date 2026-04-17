@@ -51,34 +51,39 @@ public partial class SettingsViewModel : BaseViewModel
     [RelayCommand]
     public async Task LoadAsync()
     {
-        AvailableCurrencies.Clear();
-        foreach (var c in SupportedCurrencies.All) AvailableCurrencies.Add(c);
-
-        var s = await _settings.GetAsync();
-        SelectedBaseCurrency = SupportedCurrencies.Find(s.BaseCurrency) ?? AvailableCurrencies.First();
-
-        var selected = s.DisplayCurrenciesCsv
-            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .Select(x => x.ToUpperInvariant())
-            .ToHashSet();
-
-        DisplayChoices.Clear();
-        foreach (var c in SupportedCurrencies.All)
+        try
         {
-            DisplayChoices.Add(new CurrencyChoice
+            AvailableCurrencies.Clear();
+            foreach (var c in SupportedCurrencies.All) AvailableCurrencies.Add(c);
+
+            var s = await _settings.GetAsync();
+            SelectedBaseCurrency = SupportedCurrencies.Find(s.BaseCurrency) ?? AvailableCurrencies.First();
+
+            var selected = s.DisplayCurrenciesCsv
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Select(x => x.ToUpperInvariant())
+                .ToHashSet();
+
+            DisplayChoices.Clear();
+            foreach (var c in SupportedCurrencies.All)
             {
-                Currency = c,
-                IsSelected = selected.Contains(c.Code)
-            });
+                DisplayChoices.Add(new CurrencyChoice
+                {
+                    Currency = c,
+                    IsSelected = selected.Contains(c.Code)
+                });
+            }
+
+            try { BiometricAvailable = await _biometric.IsAvailableAsync(); } catch { BiometricAvailable = false; }
+            BiometricEnabled = s.BiometricEnabled && BiometricAvailable;
+            LastRatesUpdateText = s.LastRatesUpdate?.ToLocalTime().ToString("yyyy-MM-dd HH:mm") ?? "никогда";
+
+            try { await _identity.InitializeAsync(); } catch { }
+            DeviceDisplayName = string.IsNullOrWhiteSpace(_identity.DisplayName) ? "Моё устройство" : _identity.DisplayName;
+            var id = _identity.DeviceId ?? string.Empty;
+            DeviceIdShort = id.Length > 12 ? id[..12] + "…" : id;
         }
-
-        BiometricAvailable = await _biometric.IsAvailableAsync();
-        BiometricEnabled = s.BiometricEnabled && BiometricAvailable;
-        LastRatesUpdateText = s.LastRatesUpdate?.ToLocalTime().ToString("yyyy-MM-dd HH:mm") ?? "никогда";
-
-        try { await _identity.InitializeAsync(); } catch { }
-        DeviceDisplayName = _identity.DisplayName;
-        DeviceIdShort = _identity.DeviceId.Length > 12 ? _identity.DeviceId[..12] + "…" : _identity.DeviceId;
+        catch { /* settings page must never crash */ }
     }
 
     [RelayCommand]

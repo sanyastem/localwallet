@@ -70,6 +70,11 @@ public class EventStore : IEventStore
 
         if (!_identity.Verify(authorPublicKey, GetSigningInput(ev), ev.Signature)) return false;
 
+        var author = await _db.FindFamilyMemberAsync(ev.FamilyId, ev.AuthorDeviceId);
+        if (author?.RevokedAt is not null) return false;
+
+        if (ev.EntityType == EntityType.Member && author?.Role != "Owner") return false;
+
         var plaintext = _crypto.Open(
             familyKey,
             new AeadEnvelope(ev.Nonce, ev.EncryptedPayload),

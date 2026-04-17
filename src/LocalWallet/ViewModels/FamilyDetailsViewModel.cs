@@ -23,6 +23,7 @@ public partial class FamilyDetailsViewModel : BaseViewModel
     [ObservableProperty] private string peerHost = string.Empty;
     [ObservableProperty] private int peerPort = 47321;
     [ObservableProperty] private string lastSyncedText = "никогда";
+    [ObservableProperty] private bool isOwner;
 
     public FamilyDetailsViewModel(IFamilyService families, IDatabaseService db, ISyncService sync)
     {
@@ -39,10 +40,25 @@ public partial class FamilyDetailsViewModel : BaseViewModel
         Family = await _db.GetFamilyAsync(id);
         if (Family is null) return;
         Title = Family.Name;
+        IsOwner = Family.Role == "Owner";
         var list = await _families.GetMembersAsync(id);
         Members.Clear();
         foreach (var m in list) Members.Add(m);
         LastSyncedText = Family.LastSyncedAt?.ToLocalTime().ToString("yyyy-MM-dd HH:mm") ?? "никогда";
+    }
+
+    [RelayCommand]
+    private async Task RevokeMemberAsync(Models.FamilyMember? member)
+    {
+        if (Family is null || member is null || !IsOwner) return;
+        if (Application.Current?.Windows.Count == 0 || Application.Current?.Windows[0]?.Page is null) return;
+        var confirm = await Application.Current.Windows[0].Page!.DisplayAlertAsync(
+            "Удалить участника",
+            $"Отозвать «{member.DisplayName}» из семьи? Его новые операции перестанут приниматься.",
+            "Удалить", "Отмена");
+        if (!confirm) return;
+        await _families.RevokeMemberAsync(Family.Id, member.DeviceId);
+        await LoadAsync();
     }
 
     [RelayCommand]

@@ -39,29 +39,33 @@ public partial class OnboardingViewModel : BaseViewModel
     [RelayCommand]
     public async Task LoadAsync()
     {
-        AvailableCurrencies.Clear();
-        foreach (var c in SupportedCurrencies.All) AvailableCurrencies.Add(c);
-
-        var s = await _settings.GetAsync();
-        SelectedBaseCurrency = SupportedCurrencies.Find(s.BaseCurrency) ?? AvailableCurrencies.First();
-
-        var selectedCodes = s.DisplayCurrenciesCsv
-            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .Select(x => x.ToUpperInvariant())
-            .ToHashSet();
-
-        DisplayChoices.Clear();
-        foreach (var c in SupportedCurrencies.All)
+        try
         {
-            DisplayChoices.Add(new CurrencyChoice
-            {
-                Currency = c,
-                IsSelected = selectedCodes.Contains(c.Code)
-            });
-        }
+            AvailableCurrencies.Clear();
+            foreach (var c in SupportedCurrencies.All) AvailableCurrencies.Add(c);
 
-        BiometricAvailable = await _biometric.IsAvailableAsync();
-        BiometricEnabled = s.BiometricEnabled && BiometricAvailable;
+            var s = await _settings.GetAsync();
+            SelectedBaseCurrency = SupportedCurrencies.Find(s.BaseCurrency) ?? AvailableCurrencies.First();
+
+            var selectedCodes = s.DisplayCurrenciesCsv
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Select(x => x.ToUpperInvariant())
+                .ToHashSet();
+
+            DisplayChoices.Clear();
+            foreach (var c in SupportedCurrencies.All)
+            {
+                DisplayChoices.Add(new CurrencyChoice
+                {
+                    Currency = c,
+                    IsSelected = selectedCodes.Contains(c.Code)
+                });
+            }
+
+            try { BiometricAvailable = await _biometric.IsAvailableAsync(); } catch { BiometricAvailable = false; }
+            BiometricEnabled = s.BiometricEnabled && BiometricAvailable;
+        }
+        catch { /* never crash onboarding */ }
     }
 
     [RelayCommand]
@@ -82,7 +86,9 @@ public partial class OnboardingViewModel : BaseViewModel
 
             if (BiometricEnabled && BiometricAvailable)
             {
-                var ok = await _biometric.AuthenticateAsync("Подтвердите биометрию для LocalWallet");
+                bool ok;
+                try { ok = await _biometric.AuthenticateAsync("Подтвердите биометрию для LocalWallet"); }
+                catch { ok = false; }
                 s.BiometricEnabled = ok;
                 BiometricEnabled = ok;
             }
@@ -95,13 +101,16 @@ public partial class OnboardingViewModel : BaseViewModel
             await _db.SaveSettingsAsync(s);
 
             StatusText = "Загружаем курсы валют…";
-            var ratesOk = await _rates.RefreshRatesAsync(baseCode);
+            bool ratesOk;
+            try { ratesOk = await _rates.RefreshRatesAsync(baseCode); }
+            catch { ratesOk = false; }
             StatusText = ratesOk ? "Готово" : "Курсы не загрузились — обновим позже";
 
-            if (Application.Current?.Windows.Count > 0)
-            {
-                Application.Current.Windows[0].Page = new AppShell();
-            }
+            UiAlerts.TrySetRootPage(new AppShell());
+        }
+        catch
+        {
+            StatusText = "Ошибка. Попробуйте ещё раз.";
         }
         finally
         {

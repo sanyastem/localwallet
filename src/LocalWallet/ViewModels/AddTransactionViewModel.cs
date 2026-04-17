@@ -51,28 +51,32 @@ public partial class AddTransactionViewModel : BaseViewModel
     [RelayCommand]
     public async Task LoadAsync()
     {
-        if (AvailableCurrencies.Count == 0)
+        try
         {
-            foreach (var c in SupportedCurrencies.All) AvailableCurrencies.Add(c);
+            if (AvailableCurrencies.Count == 0)
+            {
+                foreach (var c in SupportedCurrencies.All) AvailableCurrencies.Add(c);
+            }
+
+            var accs = await _db.GetAccountsAsync();
+            var cats = await _db.GetCategoriesAsync();
+            Accounts.Clear();
+            foreach (var a in accs) Accounts.Add(a);
+            Categories.Clear();
+            foreach (var c in cats.Where(c => c.Type == (IsExpense ? CategoryType.Expense : CategoryType.Income)))
+                Categories.Add(c);
+
+            SelectedAccount ??= Accounts.FirstOrDefault();
+            SelectedCategory ??= Categories.FirstOrDefault();
+            if (SelectedAccount is not null && AvailableCurrencies.Count > 0)
+                SelectedCurrency = SupportedCurrencies.Find(SelectedAccount.Currency) ?? AvailableCurrencies[0];
         }
-
-        var accs = await _db.GetAccountsAsync();
-        var cats = await _db.GetCategoriesAsync();
-        Accounts.Clear();
-        foreach (var a in accs) Accounts.Add(a);
-        Categories.Clear();
-        foreach (var c in cats.Where(c => c.Type == (IsExpense ? CategoryType.Expense : CategoryType.Income)))
-            Categories.Add(c);
-
-        SelectedAccount ??= Accounts.FirstOrDefault();
-        SelectedCategory ??= Categories.FirstOrDefault();
-        if (SelectedAccount is not null)
-            SelectedCurrency = SupportedCurrencies.Find(SelectedAccount.Currency) ?? AvailableCurrencies[0];
+        catch { }
     }
 
     partial void OnIsExpenseChanged(bool value)
     {
-        _ = LoadAsync();
+        _ = SafeReloadAsync();
     }
 
     partial void OnSelectedAccountChanged(Account? value)
@@ -81,37 +85,57 @@ public partial class AddTransactionViewModel : BaseViewModel
             SelectedCurrency = SupportedCurrencies.Find(value.Currency) ?? SelectedCurrency;
     }
 
-    [RelayCommand]
-    private async Task SaveAsync()
+    private async Task SafeReloadAsync()
     {
-        if (SelectedAccount is null || SelectedCategory is null || SelectedCurrency is null || Amount <= 0)
-        {
-            if (Application.Current?.MainPage is not null)
-                await Application.Current.MainPage.DisplayAlert("Проверка", "Заполните все поля.", "OK");
-            return;
-        }
-
-        var settings = await _db.GetSettingsAsync();
-        var currency = SelectedCurrency.Code;
-        var rate = await _rates.ConvertAsync(1m, currency, settings.BaseCurrency);
-
-        var signedAmount = IsExpense ? -Math.Abs(Amount) : Math.Abs(Amount);
-
-        var transaction = new Transaction
-        {
-            AccountId = SelectedAccount.Id,
-            CategoryId = SelectedCategory.Id,
-            FamilyId = SelectedAccount.FamilyId,
-            Amount = signedAmount,
-            Currency = currency,
-            Date = Date.ToUniversalTime(),
-            Note = Note,
-            ExchangeRateToBase = rate
-        };
-        await _writer.SaveTransactionAsync(transaction);
-        await Shell.Current.GoToAsync("..");
+        try { await LoadAsync(); }
+        catch { }
     }
 
     [RelayCommand]
-    private Task CancelAsync() => Shell.Current.GoToAsync("..");
+    private async Task SaveAsync()
+    {
+        if (IsBusy) return;
+        if (SelectedAccount is null || SelectedCategory is null || SelectedCurrency is null || Amount <= 0)
+        {
+            await UiAlerts.ShowAsync("Проверка", "Заполните все поля.");
+            return;
+        }
+        IsBusy = true;
+        try
+        {
+            var settings = await _db.GetSettingsAsync();
+            var currency = SelectedCurrency.Code;
+            var rate = await _rates.ConvertAsync(1m, currency, settings.BaseCurrency);
+
+            var signedAmount = IsExpense ? -Math.Abs(Amount) : Math.Abs(Amount);
+
+            var transaction = new Transaction
+            {
+                AccountId = SelectedAccount.Id,
+                CategoryId = SelectedCategory.Id,
+                FamilyId = SelectedAccount.FamilyId,
+                Amount = signedAmount,
+                Currency = currency,
+                Date = Date.ToUniversalTime(),
+                Note = Note,
+                ExchangeRateToBase = rate
+            };
+            await _writer.SaveTransactionAsync(transaction);
+            await SafeBackAsync();
+        }
+        catch (Exception ex)
+        {
+            await UiAlerts.ShowAsync("Ошибка", ex.Message);
+        }
+        finally { IsBusy = false; }
+    }
+
+    [RelayCommand]
+    private Task CancelAsync() => SafeBackAsync();
+
+    private static async Task SafeBackAsync()
+    {
+        try { if (Shell.Current is not null) await Shell.Current.GoToAsync(".."); }
+        catch { }
+    }
 }

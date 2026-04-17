@@ -15,12 +15,12 @@ public partial class InvitePage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        await _vm.StartAsync();
+        try { await _vm.StartAsync(); } catch { }
     }
 
     protected override void OnDisappearing()
     {
         base.OnDisappearing();
-        if (_vm.CancelCommand.CanExecute(null)) _vm.CancelCommand.Execute(null);
+        try { if (_vm.CancelCommand.CanExecute(null)) _vm.CancelCommand.Execute(null); } catch { }
     }
 }

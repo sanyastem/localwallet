@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using LocalWallet.Services;
 using LocalWallet.Services.Database;
 using LocalWallet.Services.Families;
 using LocalWallet.Services.Sync;
@@ -36,35 +37,39 @@ public partial class FamilyDetailsViewModel : BaseViewModel
     [RelayCommand]
     public async Task LoadAsync()
     {
-        if (!Guid.TryParse(FamilyIdString, out var id)) return;
-        Family = await _db.GetFamilyAsync(id);
-        if (Family is null) return;
-        Title = Family.Name;
-        IsOwner = Family.Role == "Owner";
-        var list = await _families.GetMembersAsync(id);
-        Members.Clear();
-        foreach (var m in list) Members.Add(m);
-        LastSyncedText = Family.LastSyncedAt?.ToLocalTime().ToString("yyyy-MM-dd HH:mm") ?? "никогда";
+        try
+        {
+            if (!Guid.TryParse(FamilyIdString, out var id)) return;
+            Family = await _db.GetFamilyAsync(id);
+            if (Family is null) return;
+            Title = Family.Name;
+            IsOwner = Family.Role == "Owner";
+            var list = await _families.GetMembersAsync(id);
+            Members.Clear();
+            foreach (var m in list) Members.Add(m);
+            LastSyncedText = Family.LastSyncedAt?.ToLocalTime().ToString("yyyy-MM-dd HH:mm") ?? "никогда";
+        }
+        catch { }
     }
 
     [RelayCommand]
     private async Task RevokeMemberAsync(Models.FamilyMember? member)
     {
         if (Family is null || member is null || !IsOwner) return;
-        if (Application.Current?.Windows.Count == 0 || Application.Current?.Windows[0]?.Page is null) return;
-        var confirm = await Application.Current.Windows[0].Page!.DisplayAlertAsync(
+        var confirm = await UiAlerts.ConfirmAsync(
             "Удалить участника",
             $"Отозвать «{member.DisplayName}» из семьи? Его новые операции перестанут приниматься.",
             "Удалить", "Отмена");
         if (!confirm) return;
-        await _families.RevokeMemberAsync(Family.Id, member.DeviceId);
+        try { await _families.RevokeMemberAsync(Family.Id, member.DeviceId); }
+        catch (Exception ex) { await UiAlerts.ShowAsync("Ошибка", ex.Message); }
         await LoadAsync();
     }
 
     [RelayCommand]
     private async Task SyncManualAsync()
     {
-        if (Family is null) return;
+        if (Family is null || IsBusy) return;
         if (string.IsNullOrWhiteSpace(PeerHost))
         {
             Status = "Введите IP устройства-участника";
@@ -80,6 +85,7 @@ public partial class FamilyDetailsViewModel : BaseViewModel
                 : $"Ошибка: {r.Error}";
             await LoadAsync();
         }
+        catch (Exception ex) { Status = "Ошибка: " + ex.Message; }
         finally { IsBusy = false; }
     }
 
@@ -87,20 +93,20 @@ public partial class FamilyDetailsViewModel : BaseViewModel
     private async Task InviteAsync()
     {
         if (Family is null) return;
-        await Shell.Current.GoToAsync($"{nameof(InvitePage)}?id={Family.Id}");
+        try { if (Shell.Current is not null) await Shell.Current.GoToAsync($"{nameof(InvitePage)}?id={Family.Id}"); }
+        catch { }
     }
 
     [RelayCommand]
     private async Task LeaveAsync()
     {
         if (Family is null) return;
-        if (Application.Current?.Windows.Count == 0 || Application.Current?.Windows[0]?.Page is null) return;
-        var confirm = await Application.Current.Windows[0].Page!.DisplayAlertAsync(
+        var confirm = await UiAlerts.ConfirmAsync(
             "Покинуть семью",
             $"Удалить локально семью «{Family.Name}»? Другие участники сохранят свои данные.",
             "Покинуть", "Отмена");
         if (!confirm) return;
-        await _families.LeaveAsync(Family.Id);
-        await Shell.Current.GoToAsync("..");
+        try { await _families.LeaveAsync(Family.Id); } catch { }
+        try { if (Shell.Current is not null) await Shell.Current.GoToAsync(".."); } catch { }
     }
 }

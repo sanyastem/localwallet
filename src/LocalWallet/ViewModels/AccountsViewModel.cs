@@ -34,53 +34,72 @@ public partial class AccountsViewModel : BaseViewModel
     [RelayCommand]
     public async Task LoadAsync()
     {
-        if (AvailableCurrencies.Count == 0)
+        try
         {
-            foreach (var c in SupportedCurrencies.All) AvailableCurrencies.Add(c);
-        }
+            if (AvailableCurrencies.Count == 0)
+            {
+                foreach (var c in SupportedCurrencies.All) AvailableCurrencies.Add(c);
+            }
 
-        AvailableScopes.Clear();
-        AvailableScopes.Add(new FamilyScope(null, "Личный"));
-        foreach (var f in await _families.ListAsync())
-        {
-            AvailableScopes.Add(new FamilyScope(f.Id, $"Семья «{f.Name}»"));
-        }
-        SelectedScope ??= AvailableScopes[0];
+            AvailableScopes.Clear();
+            AvailableScopes.Add(new FamilyScope(null, "Личный"));
+            foreach (var f in await _families.ListAsync())
+            {
+                AvailableScopes.Add(new FamilyScope(f.Id, $"Семья «{f.Name}»"));
+            }
+            SelectedScope ??= AvailableScopes[0];
 
-        if (SelectedCurrency is null)
-        {
-            var settings = await _db.GetSettingsAsync();
-            SelectedCurrency = SupportedCurrencies.Find(settings.BaseCurrency) ?? AvailableCurrencies[0];
-        }
+            if (SelectedCurrency is null && AvailableCurrencies.Count > 0)
+            {
+                var settings = await _db.GetSettingsAsync();
+                SelectedCurrency = SupportedCurrencies.Find(settings.BaseCurrency) ?? AvailableCurrencies[0];
+            }
 
-        var list = await _db.GetAccountsAsync();
-        Items.Clear();
-        foreach (var a in list) Items.Add(a);
+            var list = await _db.GetAccountsAsync();
+            Items.Clear();
+            foreach (var a in list) Items.Add(a);
+        }
+        catch { }
     }
 
     [RelayCommand]
     private async Task AddAsync()
     {
-        if (string.IsNullOrWhiteSpace(NewAccountName) || SelectedCurrency is null) return;
-        var account = new Account
+        if (IsBusy) return;
+        if (string.IsNullOrWhiteSpace(NewAccountName) || SelectedCurrency is null)
         {
-            Name = NewAccountName.Trim(),
-            Currency = SelectedCurrency.Code,
-            InitialBalance = NewAccountInitialBalance,
-            FamilyId = SelectedScope?.FamilyId
-        };
-        await _writer.SaveAccountAsync(account);
-        NewAccountName = string.Empty;
-        NewAccountInitialBalance = 0;
-        await LoadAsync();
+            await UiAlerts.ShowAsync("Проверка", "Укажите название и валюту.");
+            return;
+        }
+        IsBusy = true;
+        try
+        {
+            var account = new Account
+            {
+                Name = NewAccountName.Trim(),
+                Currency = SelectedCurrency.Code,
+                InitialBalance = NewAccountInitialBalance,
+                FamilyId = SelectedScope?.FamilyId
+            };
+            await _writer.SaveAccountAsync(account);
+            NewAccountName = string.Empty;
+            NewAccountInitialBalance = 0;
+            await LoadAsync();
+        }
+        catch (Exception ex) { await UiAlerts.ShowAsync("Ошибка", ex.Message); }
+        finally { IsBusy = false; }
     }
 
     [RelayCommand]
     private async Task DeleteAsync(Account account)
     {
         if (account is null) return;
-        await _writer.DeleteAccountAsync(account);
-        Items.Remove(account);
+        try
+        {
+            await _writer.DeleteAccountAsync(account);
+            Items.Remove(account);
+        }
+        catch (Exception ex) { await UiAlerts.ShowAsync("Ошибка", ex.Message); }
     }
 }
 

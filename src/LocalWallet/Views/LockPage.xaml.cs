@@ -15,20 +15,20 @@ public partial class LockPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        await TryUnlockAsync();
+        try { await TryUnlockAsync(); } catch { }
     }
 
     private async void OnRetryClicked(object? sender, EventArgs e)
     {
-        await TryUnlockAsync();
+        try { await TryUnlockAsync(); } catch { }
     }
 
     private async Task TryUnlockAsync()
     {
-        var ok = await _biometric.AuthenticateAsync("Подтвердите вход в LocalWallet");
-        if (ok && Application.Current is not null)
-        {
-            Application.Current.Windows[0].Page = new AppShell();
-        }
+        bool ok;
+        try { ok = await _biometric.AuthenticateAsync("Подтвердите вход в LocalWallet"); }
+        catch { ok = false; }
+
+        if (ok) UiAlerts.TrySetRootPage(new AppShell());
     }
 }

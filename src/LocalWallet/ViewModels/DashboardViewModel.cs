@@ -39,18 +39,21 @@ public partial class DashboardViewModel : BaseViewModel
             var transactions = await _db.GetTransactionsAsync();
             HasAccounts = accounts.Count > 0;
 
-            decimal total = 0;
+            var amountByCurrency = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase);
             foreach (var acc in accounts)
-            {
-                total += await _rates.ConvertAsync(acc.InitialBalance, acc.Currency, BaseCurrency);
-            }
+                amountByCurrency[acc.Currency] = amountByCurrency.GetValueOrDefault(acc.Currency) + acc.InitialBalance;
+            var accountIds = accounts.Select(a => a.Id).ToHashSet();
             foreach (var t in transactions)
             {
-                var signed = transactions.FirstOrDefault(x => x.Id == t.Id);
-                var account = accounts.FirstOrDefault(a => a.Id == t.AccountId);
-                if (account is null) continue;
-                var converted = await _rates.ConvertAsync(t.Amount, t.Currency, BaseCurrency);
-                total += converted;
+                if (!accountIds.Contains(t.AccountId)) continue;
+                amountByCurrency[t.Currency] = amountByCurrency.GetValueOrDefault(t.Currency) + t.Amount;
+            }
+
+            decimal total = 0;
+            foreach (var (ccy, amount) in amountByCurrency)
+            {
+                if (amount == 0) continue;
+                total += await _rates.ConvertAsync(amount, ccy, BaseCurrency);
             }
             TotalBalance = total;
 
@@ -86,13 +89,15 @@ public partial class DashboardViewModel : BaseViewModel
     [RelayCommand]
     private async Task AddTransactionAsync()
     {
-        await Shell.Current.GoToAsync(nameof(AddTransactionPage));
+        try { if (Shell.Current is not null) await Shell.Current.GoToAsync(nameof(AddTransactionPage)); }
+        catch { }
     }
 
     [RelayCommand]
     private async Task CreateAccountAsync()
     {
-        await Shell.Current.GoToAsync(nameof(AccountsPage));
+        try { if (Shell.Current is not null) await Shell.Current.GoToAsync(nameof(AccountsPage)); }
+        catch { }
     }
 }
 

@@ -15,6 +15,6 @@ public partial class StatisticsPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        await _vm.LoadAsync();
+        try { await _vm.LoadAsync(); } catch { }
     }
 }

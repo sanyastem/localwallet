@@ -15,6 +15,6 @@ public partial class OnboardingPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        await _vm.LoadCommand.ExecuteAsync(null);
+        try { await _vm.LoadCommand.ExecuteAsync(null); } catch { }
     }
 }

@@ -46,37 +46,56 @@ public partial class CategoriesViewModel : BaseViewModel
     [RelayCommand]
     public async Task LoadAsync()
     {
-        AvailableScopes.Clear();
-        AvailableScopes.Add(new FamilyScope(null, "Личный"));
-        foreach (var f in await _families.ListAsync())
-            AvailableScopes.Add(new FamilyScope(f.Id, $"Семья «{f.Name}»"));
-        SelectedScope ??= AvailableScopes[0];
+        try
+        {
+            AvailableScopes.Clear();
+            AvailableScopes.Add(new FamilyScope(null, "Личный"));
+            foreach (var f in await _families.ListAsync())
+                AvailableScopes.Add(new FamilyScope(f.Id, $"Семья «{f.Name}»"));
+            SelectedScope ??= AvailableScopes[0];
 
-        var list = await _db.GetCategoriesAsync();
-        Items.Clear();
-        foreach (var c in list.OrderBy(c => c.Type).ThenBy(c => c.Name)) Items.Add(c);
+            var list = await _db.GetCategoriesAsync();
+            Items.Clear();
+            foreach (var c in list.OrderBy(c => c.Type).ThenBy(c => c.Name)) Items.Add(c);
+        }
+        catch { }
     }
 
     [RelayCommand]
     private async Task AddAsync()
     {
-        if (string.IsNullOrWhiteSpace(NewCategoryName)) return;
-        var cat = new Category
+        if (IsBusy) return;
+        if (string.IsNullOrWhiteSpace(NewCategoryName))
         {
-            Name = NewCategoryName.Trim(),
-            Type = NewIsExpense ? CategoryType.Expense : CategoryType.Income,
-            FamilyId = SelectedScope?.FamilyId
-        };
-        await _writer.SaveCategoryAsync(cat);
-        NewCategoryName = string.Empty;
-        await LoadAsync();
+            await UiAlerts.ShowAsync("Проверка", "Введите название категории.");
+            return;
+        }
+        IsBusy = true;
+        try
+        {
+            var cat = new Category
+            {
+                Name = NewCategoryName.Trim(),
+                Type = NewIsExpense ? CategoryType.Expense : CategoryType.Income,
+                FamilyId = SelectedScope?.FamilyId
+            };
+            await _writer.SaveCategoryAsync(cat);
+            NewCategoryName = string.Empty;
+            await LoadAsync();
+        }
+        catch (Exception ex) { await UiAlerts.ShowAsync("Ошибка", ex.Message); }
+        finally { IsBusy = false; }
     }
 
     [RelayCommand]
     private async Task DeleteAsync(Category category)
     {
         if (category is null) return;
-        await _writer.DeleteCategoryAsync(category);
-        Items.Remove(category);
+        try
+        {
+            await _writer.DeleteCategoryAsync(category);
+            Items.Remove(category);
+        }
+        catch (Exception ex) { await UiAlerts.ShowAsync("Ошибка", ex.Message); }
     }
 }

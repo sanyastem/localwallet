@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LocalWallet.Models;
+using LocalWallet.Services;
 using LocalWallet.Services.Database;
 using LocalWallet.ViewModels.Base;
 using LocalWallet.Views;
@@ -11,21 +12,22 @@ namespace LocalWallet.ViewModels;
 public partial class TransactionsViewModel : BaseViewModel
 {
     private readonly IDatabaseService _db;
+    private readonly IEntityWriter _writer;
 
     [ObservableProperty] private ObservableCollection<TransactionDisplay> items = new();
     [ObservableProperty] private DateTime fromDate = DateTime.Today.AddMonths(-1);
     [ObservableProperty] private DateTime toDate = DateTime.Today.AddDays(1).AddSeconds(-1);
 
-    public TransactionsViewModel(IDatabaseService db)
+    public TransactionsViewModel(IDatabaseService db, IEntityWriter writer)
     {
         _db = db;
+        _writer = writer;
         Title = "Операции";
     }
 
     [RelayCommand]
     public async Task LoadAsync()
     {
-        if (IsBusy) return;
         IsBusy = true;
         try
         {
@@ -51,6 +53,7 @@ public partial class TransactionsViewModel : BaseViewModel
                 });
             }
         }
+        catch { }
         finally
         {
             IsBusy = false;
@@ -61,13 +64,19 @@ public partial class TransactionsViewModel : BaseViewModel
     private async Task DeleteAsync(TransactionDisplay item)
     {
         if (item is null) return;
-        await _db.DeleteTransactionAsync(item.Id);
-        Items.Remove(item);
+        try
+        {
+            var full = await _db.GetTransactionAsync(item.Id);
+            if (full is not null) await _writer.DeleteTransactionAsync(full);
+            Items.Remove(item);
+        }
+        catch (Exception ex) { await UiAlerts.ShowAsync("Ошибка", ex.Message); }
     }
 
     [RelayCommand]
     private async Task AddAsync()
     {
-        await Shell.Current.GoToAsync(nameof(AddTransactionPage));
+        try { if (Shell.Current is not null) await Shell.Current.GoToAsync(nameof(AddTransactionPage)); }
+        catch { }
     }
 }

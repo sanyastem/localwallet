@@ -2,6 +2,7 @@ using System.Net.Sockets;
 using System.Text.Json;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using LocalWallet.Services;
 using LocalWallet.Services.Crypto;
 using LocalWallet.Services.Database;
 using LocalWallet.Services.Families;
@@ -53,13 +54,13 @@ public partial class InviteViewModel : BaseViewModel
     [RelayCommand]
     public async Task StartAsync()
     {
-        if (!Guid.TryParse(FamilyIdString, out var fid)) return;
-        await _identity.InitializeAsync();
-        Family = await _db.GetFamilyAsync(fid);
-        if (Family is null) { Status = "Семья не найдена"; return; }
-
         try
         {
+            if (!Guid.TryParse(FamilyIdString, out var fid)) return;
+            try { await _identity.InitializeAsync(); } catch { }
+            Family = await _db.GetFamilyAsync(fid);
+            if (Family is null) { Status = "Семья не найдена"; return; }
+
             var eph = _pairing.CreateEphemeralKeypair();
             var salt = new byte[32];
             System.Security.Cryptography.RandomNumberGenerator.Fill(salt);
@@ -95,7 +96,12 @@ public partial class InviteViewModel : BaseViewModel
             Status = "Попросите другое устройство отсканировать QR";
 
             _cts = new CancellationTokenSource();
-            _ = Task.Run(() => AcceptPeerAsync(_cts.Token));
+            var token = _cts.Token;
+            _ = Task.Run(async () =>
+            {
+                try { await AcceptPeerAsync(token); }
+                catch { /* top-level guard */ }
+            });
         }
         catch (Exception ex)
         {
@@ -151,9 +157,14 @@ public partial class InviteViewModel : BaseViewModel
                 PairingInProgress = true;
             });
         }
+        catch (OperationCanceledException) { /* expected on cancel */ }
         catch (Exception ex)
         {
-            await MainThread.InvokeOnMainThreadAsync(() => Status = "Ошибка соединения: " + ex.Message);
+            try
+            {
+                await MainThread.InvokeOnMainThreadAsync(() => Status = "Ошибка соединения: " + ex.Message);
+            }
+            catch { }
             Cleanup();
         }
     }
@@ -194,9 +205,8 @@ public partial class InviteViewModel : BaseViewModel
             PairingInProgress = false;
             Cleanup();
 
-            if (Application.Current?.MainPage is not null)
-                await Application.Current.MainPage.DisplayAlert("Успех", $"«{_peerDisplayName}» присоединился к семье.", "OK");
-            await Shell.Current.GoToAsync("..");
+            await UiAlerts.ShowAsync("Успех", $"«{_peerDisplayName}» присоединился к семье.");
+            try { if (Shell.Current is not null) await Shell.Current.GoToAsync(".."); } catch { }
         }
         catch (Exception ex)
         {
@@ -217,7 +227,7 @@ public partial class InviteViewModel : BaseViewModel
         try { _session?.Stream?.Dispose(); } catch { }
         try { _session?.Client?.Dispose(); } catch { }
         try { _session?.Listener?.Stop(); } catch { }
-        _session?.Ours.Clear();
+        try { _session?.Ours.Clear(); } catch { }
         _session = null;
     }
 
@@ -225,8 +235,7 @@ public partial class InviteViewModel : BaseViewModel
     {
         using var gen = new QRCodeGenerator();
         var data = gen.CreateQrCode(content, QRCodeGenerator.ECCLevel.M);
-        var png = new PngByteQRCode(data).GetGraphic(12);
-        var bytes = png;
+        var bytes = new PngByteQRCode(data).GetGraphic(12);
         return ImageSource.FromStream(() => new MemoryStream(bytes));
     }
 

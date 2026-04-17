@@ -33,7 +33,6 @@ public partial class StatisticsViewModel : BaseViewModel
     [RelayCommand]
     public async Task LoadAsync()
     {
-        if (IsBusy) return;
         IsBusy = true;
         try
         {
@@ -46,11 +45,26 @@ public partial class StatisticsViewModel : BaseViewModel
 
             decimal expenses = 0, income = 0;
             var byCategory = new Dictionary<Guid, decimal>();
+            var rateCache = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase);
 
             foreach (var t in transactions)
             {
-                var amountInBase = await _rates.ConvertAsync(Math.Abs(t.Amount), t.Currency, BaseCurrency);
                 if (!categories.TryGetValue(t.CategoryId, out var cat)) continue;
+
+                decimal amountInBase;
+                if (string.Equals(t.Currency, BaseCurrency, StringComparison.OrdinalIgnoreCase))
+                    amountInBase = Math.Abs(t.Amount);
+                else if (t.ExchangeRateToBase > 0)
+                    amountInBase = Math.Abs(t.Amount) * t.ExchangeRateToBase;
+                else
+                {
+                    if (!rateCache.TryGetValue(t.Currency, out var rate))
+                    {
+                        rate = await _rates.ConvertAsync(1m, t.Currency, BaseCurrency);
+                        rateCache[t.Currency] = rate;
+                    }
+                    amountInBase = Math.Abs(t.Amount) * rate;
+                }
 
                 if (cat.Type == CategoryType.Expense)
                 {
@@ -96,6 +110,7 @@ public partial class StatisticsViewModel : BaseViewModel
                 BackgroundColor = SKColors.Transparent
             };
         }
+        catch { }
         finally
         {
             IsBusy = false;

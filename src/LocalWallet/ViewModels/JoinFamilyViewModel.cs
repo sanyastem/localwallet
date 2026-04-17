@@ -2,6 +2,7 @@ using System.Net.Sockets;
 using System.Text.Json;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using LocalWallet.Services;
 using LocalWallet.Services.Crypto;
 using LocalWallet.Services.Families;
 using LocalWallet.Services.Sync;
@@ -70,7 +71,7 @@ public partial class JoinFamilyViewModel : BaseViewModel
         IsBusy = true;
         Status = $"Подключение к {payload.FamilyName} ({payload.Ip}:{payload.Port})…";
 
-        await _identity.InitializeAsync();
+        try { await _identity.InitializeAsync(); } catch { }
 
         try
         {
@@ -156,9 +157,8 @@ public partial class JoinFamilyViewModel : BaseViewModel
             SasVisible = false;
             Reset();
 
-            if (Application.Current?.Windows.Count > 0 && Application.Current.Windows[0].Page is not null)
-                await Application.Current.Windows[0].Page!.DisplayAlertAsync("Готово", $"Семья «{bundle.FamilyName}» добавлена.", "OK");
-            await Shell.Current.GoToAsync($"..?id={fid}");
+            await UiAlerts.ShowAsync("Готово", $"Семья «{bundle.FamilyName}» добавлена.");
+            try { if (Shell.Current is not null) await Shell.Current.GoToAsync($"..?id={fid}"); } catch { }
         }
         catch (Exception ex)
         {
@@ -177,7 +177,7 @@ public partial class JoinFamilyViewModel : BaseViewModel
     {
         try { _session?.Stream?.Dispose(); } catch { }
         try { _session?.Client?.Dispose(); } catch { }
-        _session?.Ours.Clear();
+        try { _session?.Ours.Clear(); } catch { }
         _session = null;
         _invite = null;
     }

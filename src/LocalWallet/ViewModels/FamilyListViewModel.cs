@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using LocalWallet.Services;
 using LocalWallet.Services.Families;
 using LocalWallet.ViewModels.Base;
 using LocalWallet.Views;
@@ -23,9 +24,13 @@ public partial class FamilyListViewModel : BaseViewModel
     [RelayCommand]
     public async Task LoadAsync()
     {
-        var list = await _families.ListAsync();
-        Items.Clear();
-        foreach (var f in list) Items.Add(f);
+        try
+        {
+            var list = await _families.ListAsync();
+            Items.Clear();
+            foreach (var f in list) Items.Add(f);
+        }
+        catch { }
     }
 
     [RelayCommand]
@@ -37,21 +42,25 @@ public partial class FamilyListViewModel : BaseViewModel
         {
             var f = await _families.CreateAsync(NewFamilyName);
             await LoadAsync();
-            await Shell.Current.GoToAsync($"{nameof(FamilyDetailsPage)}?id={f.Id}");
+            try { if (Shell.Current is not null) await Shell.Current.GoToAsync($"{nameof(FamilyDetailsPage)}?id={f.Id}"); }
+            catch { }
         }
+        catch (Exception ex) { await UiAlerts.ShowAsync("Ошибка", ex.Message); }
         finally { IsBusy = false; }
     }
 
     [RelayCommand]
     private async Task JoinAsync()
     {
-        await Shell.Current.GoToAsync(nameof(JoinFamilyPage));
+        try { if (Shell.Current is not null) await Shell.Current.GoToAsync(nameof(JoinFamilyPage)); }
+        catch { }
     }
 
     [RelayCommand]
     private async Task OpenAsync(Models.Family family)
     {
         if (family is null) return;
-        await Shell.Current.GoToAsync($"{nameof(FamilyDetailsPage)}?id={family.Id}");
+        try { if (Shell.Current is not null) await Shell.Current.GoToAsync($"{nameof(FamilyDetailsPage)}?id={family.Id}"); }
+        catch { }
     }
 }

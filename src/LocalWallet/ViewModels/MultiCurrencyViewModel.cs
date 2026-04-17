@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using LocalWallet.Services;
 using LocalWallet.Services.Database;
 using LocalWallet.Services.ExchangeRates;
 using LocalWallet.ViewModels.Base;
@@ -44,11 +45,18 @@ public partial class MultiCurrencyViewModel : BaseViewModel
             var transactions = await _db.GetTransactionsAsync();
             HasAccounts = accounts.Count > 0;
 
-            decimal totalInBase = 0;
+            var amountByCurrency = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase);
             foreach (var acc in accounts)
-                totalInBase += await _rates.ConvertAsync(acc.InitialBalance, acc.Currency, baseCurrency);
+                amountByCurrency[acc.Currency] = amountByCurrency.GetValueOrDefault(acc.Currency) + acc.InitialBalance;
             foreach (var t in transactions)
-                totalInBase += await _rates.ConvertAsync(t.Amount, t.Currency, baseCurrency);
+                amountByCurrency[t.Currency] = amountByCurrency.GetValueOrDefault(t.Currency) + t.Amount;
+
+            decimal totalInBase = 0;
+            foreach (var (ccy, amount) in amountByCurrency)
+            {
+                if (amount == 0) continue;
+                totalInBase += await _rates.ConvertAsync(amount, ccy, baseCurrency);
+            }
 
             Balances.Clear();
             foreach (var code in displayCurrencies)
@@ -94,7 +102,7 @@ public partial class MultiCurrencyViewModel : BaseViewModel
             var settings = await _db.GetSettingsAsync();
             var ok = await _rates.RefreshRatesAsync(settings.BaseCurrency);
             await LoadAsync();
-            if (!ok) await ShowAlertAsync("Курсы", "Не удалось обновить. Проверьте интернет.");
+            if (!ok) await UiAlerts.ShowAsync("Курсы", "Не удалось обновить. Проверьте интернет.");
         }
         catch { }
         finally
@@ -104,15 +112,9 @@ public partial class MultiCurrencyViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task CreateAccountAsync() => await Shell.Current.GoToAsync(nameof(AccountsPage));
-
-    private static async Task ShowAlertAsync(string title, string body)
+    private async Task CreateAccountAsync()
     {
-        try
-        {
-            if (Application.Current?.Windows.Count > 0 && Application.Current.Windows[0].Page is not null)
-                await Application.Current.Windows[0].Page!.DisplayAlertAsync(title, body, "OK");
-        }
+        try { if (Shell.Current is not null) await Shell.Current.GoToAsync(nameof(AccountsPage)); }
         catch { }
     }
 }

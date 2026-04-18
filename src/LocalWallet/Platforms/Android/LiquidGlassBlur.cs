@@ -36,7 +36,7 @@ public static class LiquidGlassBlur
         {
             var effect = global::Android.Graphics.RenderEffect.CreateBlurEffect(
                 32f, 32f,
-                global::Android.Graphics.Shader.TileMode.Clamp);
+                global::Android.Graphics.Shader.TileMode.Clamp!);
             nativeView.SetRenderEffect(effect);
         }
         catch (Exception ex)

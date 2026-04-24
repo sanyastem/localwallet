@@ -39,9 +39,10 @@
                     </VerticalStackLayout>
                 </Border>
 
-                <!-- Multiple families: pick one -->
-                <VerticalStackLayout IsVisible="{Binding HasMultiple}" Spacing="10">
-                    <Label Text="Выберите семью" Style="{StaticResource H2}" />
+                <!-- Family list: shown whenever at least one family exists.
+                     Each row opens that family's chat. iOS Messages-style. -->
+                <VerticalStackLayout IsVisible="{Binding HasFamilies}" Spacing="10">
+                    <Label Text="Чаты семей" Style="{StaticResource H2}" />
                     <CollectionView ItemsSource="{Binding Items}" SelectionMode="None" HeightRequest="420">
                         <CollectionView.ItemTemplate>
                             <DataTemplate x:DataType="m:Family">

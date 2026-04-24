@@ -58,17 +58,20 @@ public class AppTabBar : LiquidGlassTabBar
         try
         {
             var loc = Shell.Current?.CurrentState?.Location?.OriginalString ?? string.Empty;
-            var best = -1;
+            // Normalise "//chat/ChatPage?id=..." -> "chat" so we match the
+            // top-level Shell route, not any substring deeper in the URL.
+            var firstSegment = loc.TrimStart('/').Split('/', '?').FirstOrDefault() ?? string.Empty;
+            if (string.IsNullOrEmpty(firstSegment)) return;
+
             for (int i = 0; i < Items.Count; i++)
             {
-                var r = Items[i].Route.TrimStart('/');
-                if (loc.Contains(r, StringComparison.OrdinalIgnoreCase))
+                var route = Items[i].Route.TrimStart('/');
+                if (string.Equals(route, firstSegment, StringComparison.OrdinalIgnoreCase))
                 {
-                    best = i;
-                    break;
+                    if (i != SelectedIndex) SelectedIndex = i;
+                    return;
                 }
             }
-            if (best >= 0 && best != SelectedIndex) SelectedIndex = best;
         }
         catch (Exception ex)
         {

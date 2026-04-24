@@ -33,8 +33,9 @@ public partial class ChatHubViewModel : BaseViewModel
             HasFamilies = Items.Count > 0;
             HasMultiple = Items.Count > 1;
 
-            // Single-family quick-path: auto-navigate into the chat.
-            if (Items.Count == 1) await OpenChatAsync(Items[0]);
+            // Deliberately do NOT auto-navigate into a single-family chat.
+            // If we did, pressing back from ChatPage would land on this hub,
+            // re-fire OnAppearing, and loop straight back into the chat.
         }
         catch (Exception ex)
         {

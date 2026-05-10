@@ -5,7 +5,7 @@
        x:Class="LocalWallet.AppShell"
        Shell.FlyoutBehavior="Disabled"
        Shell.TabBarIsVisible="False"
-       Title="LocalWallet">
+       Title="Local Wallet">
 
     <!-- Five routed pages; Shell's native bottom bar is hidden and our
          Liquid-Glass AppTabBar floats over each page via AppPageTemplate. -->

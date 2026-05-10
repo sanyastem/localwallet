@@ -170,7 +170,7 @@ public partial class App : Application
                         {
                             new Label
                             {
-                                Text = "LocalWallet",
+                                Text = "Local Wallet",
                                 FontSize = 28,
                                 TextColor = Colors.White,
                                 HorizontalOptions = LayoutOptions.Center,

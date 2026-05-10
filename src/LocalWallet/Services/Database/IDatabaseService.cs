@@ -62,6 +62,7 @@ public interface IDatabaseService
     Task<List<(string DeviceId, long MaxClock)>> GetVectorClockAsync(Guid familyId);
     Task AppendEventAsync(SyncEvent ev);
     Task<bool> EventExistsAsync(Guid eventId);
+    Task DeleteEventAsync(Guid eventId);
 
     // Admin
     Task ResetAllDataAsync();

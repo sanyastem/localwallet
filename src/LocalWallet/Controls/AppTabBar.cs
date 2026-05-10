@@ -21,7 +21,9 @@ public class AppTabBar : LiquidGlassTabBar
 
     public AppTabBar()
     {
-        Margin = new Thickness(12, 0, 12, 14);
+        // Side and bottom gutters live in the ControlTemplate's wrapper Grid.
+        // Keeping them on this control breaks AbsoluteLayout's proportional
+        // sizing (margin isn't subtracted from WidthProportional=1).
 
         Items = DefaultTabs.Select(t => new TabBarItem
         {

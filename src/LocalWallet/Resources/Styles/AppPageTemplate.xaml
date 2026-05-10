@@ -17,9 +17,16 @@
             <ContentPresenter
                 AbsoluteLayout.LayoutFlags="All"
                 AbsoluteLayout.LayoutBounds="0,0,1,1" />
-            <controls:AppTabBar
+            <!-- Grid wrapper applies the side gutters and the bottom safe-area
+                 inset; AppTabBar itself fills it. AbsoluteLayout's
+                 WidthProportional doesn't subtract child margin reliably,
+                 so we keep the gutters in the wrapper instead of on the bar. -->
+            <Grid
                 AbsoluteLayout.LayoutFlags="PositionProportional,WidthProportional"
-                AbsoluteLayout.LayoutBounds="0.5,1,1,AutoSize" />
+                AbsoluteLayout.LayoutBounds="0.5,1,1,AutoSize"
+                Padding="12,0,12,14">
+                <controls:AppTabBar />
+            </Grid>
         </AbsoluteLayout>
     </ControlTemplate>
 

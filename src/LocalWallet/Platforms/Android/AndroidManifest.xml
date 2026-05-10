@@ -4,7 +4,7 @@
 	             android:icon="@mipmap/appicon"
 	             android:roundIcon="@mipmap/appicon_round"
 	             android:supportsRtl="true"
-	             android:label="LocalWallet" />
+	             android:label="Local Wallet" />
 	<uses-permission android:name="android.permission.INTERNET" />
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 	<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />

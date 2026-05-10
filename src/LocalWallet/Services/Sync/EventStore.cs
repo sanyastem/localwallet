@@ -55,7 +55,17 @@ public class EventStore : IEventStore
             settings.CurrentLamportClock = nextClock;
             await _db.SaveSettingsAsync(settings);
 
-            await _projector.ProjectAsync(ev, draft.PayloadPlaintext);
+            try
+            {
+                await _projector.ProjectAsync(ev, draft.PayloadPlaintext);
+            }
+            catch
+            {
+                // Keep log and projection consistent: if applying the event fails,
+                // remove it from the log so a retry can re-emit it.
+                try { await _db.DeleteEventAsync(ev.Id); } catch { }
+                throw;
+            }
             return ev;
         }
         finally
@@ -92,7 +102,17 @@ public class EventStore : IEventStore
             }
 
             await _db.AppendEventAsync(ev);
-            await _projector.ProjectAsync(ev, plaintext);
+            try
+            {
+                await _projector.ProjectAsync(ev, plaintext);
+            }
+            catch
+            {
+                // Keep log and projection consistent: drop the event so a future
+                // sync re-delivers it instead of EventExists short-circuiting.
+                try { await _db.DeleteEventAsync(ev.Id); } catch { }
+                throw;
+            }
             return true;
         }
         finally

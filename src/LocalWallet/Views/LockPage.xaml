@@ -7,7 +7,7 @@
     <Grid BackgroundColor="{StaticResource Primary}">
         <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="24">
             <Label Text="🔒" FontSize="72" HorizontalOptions="Center" />
-            <Label Text="LocalWallet" FontSize="32" TextColor="White" HorizontalOptions="Center" />
+            <Label Text="Local Wallet" FontSize="32" TextColor="White" HorizontalOptions="Center" />
             <Label Text="Подтвердите вход" FontSize="16" TextColor="White" HorizontalOptions="Center" />
             <Button x:Name="RetryButton"
                     Text="Попробовать снова"

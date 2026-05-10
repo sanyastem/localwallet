@@ -27,7 +27,7 @@ public class BiometricService : IBiometricService
     {
         try
         {
-            var request = new AuthenticationRequestConfiguration("LocalWallet", reason)
+            var request = new AuthenticationRequestConfiguration("Local Wallet", reason)
             {
                 AllowAlternativeAuthentication = true,
                 CancelTitle = "Отмена"

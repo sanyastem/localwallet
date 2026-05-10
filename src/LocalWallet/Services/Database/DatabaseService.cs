@@ -406,6 +406,12 @@ public class DatabaseService : IDatabaseService
         return e is not null;
     }
 
+    public async Task DeleteEventAsync(Guid eventId)
+    {
+        var db = await GetConnectionAsync();
+        await db.DeleteAsync<SyncEvent>(eventId);
+    }
+
     public async Task ResetAllDataAsync()
     {
         var db = await GetConnectionAsync();

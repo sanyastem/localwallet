@@ -14,6 +14,7 @@ public interface IAutoSyncCoordinator
 public class AutoSyncCoordinator : IAutoSyncCoordinator
 {
     private static readonly TimeSpan PerPeerCooldown = TimeSpan.FromSeconds(3);
+    private static readonly TimeSpan LastSyncEntryTtl = TimeSpan.FromMinutes(10);
 
     private readonly ILanDiscoveryService _discovery;
     private readonly ISyncService _sync;
@@ -85,20 +86,27 @@ public class AutoSyncCoordinator : IAutoSyncCoordinator
     private async Task SyncWithPeerDebouncedAsync(DiscoveredPeer peer)
     {
         var key = (peer.FamilyId, peer.DeviceId);
+        var now = DateTime.UtcNow;
         lock (_gate)
         {
-            if (_lastSync.TryGetValue(key, out var last) && DateTime.UtcNow - last < PerPeerCooldown)
+            if (_lastSync.TryGetValue(key, out var last) && now - last < PerPeerCooldown)
                 return;
-            _lastSync[key] = DateTime.UtcNow;
+            _lastSync[key] = now;
+            // Cheap inline cleanup: drop entries older than the TTL so the map
+            // doesn't grow unbounded as peers come and go on the LAN.
+            if (_lastSync.Count > 64)
+            {
+                var stale = _lastSync.Where(kv => now - kv.Value > LastSyncEntryTtl).Select(kv => kv.Key).ToList();
+                foreach (var k in stale) _lastSync.Remove(k);
+            }
         }
 
         try
         {
-            var result = await _sync.SyncWithPeerAsync(peer.FamilyId, peer.Host, peer.Port);
-            if (result.Success && (result.EventsReceived > 0 || result.EventsSent > 0))
-            {
-                FamilySynced?.Invoke(peer.FamilyId);
-            }
+            // SyncWithPeerAsync raises ISyncService.SyncCompleted on success,
+            // which AutoSyncCoordinator forwards as FamilySynced — no need to
+            // raise it again here (would cause every refreshing VM to reload twice).
+            await _sync.SyncWithPeerAsync(peer.FamilyId, peer.Host, peer.Port);
         }
         catch (Exception ex)
         {

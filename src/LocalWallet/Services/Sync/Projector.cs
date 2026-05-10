@@ -112,12 +112,8 @@ public class Projector : IProjector
         }
     }
 
-    private static bool IsOlderOrEqual(SyncEvent ev, long currentClock, string? currentAuthor)
-    {
-        if (ev.LamportClock < currentClock) return true;
-        if (ev.LamportClock > currentClock) return false;
-        return string.CompareOrdinal(ev.AuthorDeviceId, currentAuthor ?? string.Empty) <= 0;
-    }
+    private static bool IsOlderOrEqual(SyncEvent ev, long currentClock, string? currentAuthor) =>
+        LamportOrder.IsIncomingOlderOrEqual(ev.LamportClock, ev.AuthorDeviceId, currentClock, currentAuthor);
 }
 
 public record MemberRevokePayload(string DeviceId);

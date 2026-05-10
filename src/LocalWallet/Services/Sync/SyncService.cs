@@ -148,6 +148,7 @@ public class SyncService : ISyncService
             if (family is null) return new SyncResult(false, 0, 0, "family unknown");
             var member = await _db.FindFamilyMemberAsync(familyId, peerDeviceId);
             if (member is null) return new SyncResult(false, 0, 0, "peer not a member");
+            if (member.RevokedAt is not null) return new SyncResult(false, 0, 0, "peer revoked");
 
             var ourChallenge = Convert.ToBase64String(RandomBytes(32));
             var sigOfTheirChallenge = _identity.Sign(Encoding.UTF8.GetBytes(hello.Challenge));
@@ -221,19 +222,21 @@ public class SyncService : ISyncService
         var (_, peerClockJson) = UnwrapTyped(peerClockRaw);
         var peerVector = JsonSerializer.Deserialize<VectorClockMessage>(peerClockJson)?.Clocks ?? new();
 
+        // Build a per-author "since" cursor: peer's reported max for known authors,
+        // 0 for authors peer has never seen. Authors we don't know about either
+        // are irrelevant to us. Each author appears exactly once — concatenating
+        // peerVector with our own deviceId would otherwise double-emit our events
+        // when peer already knows some of them.
+        var sinceByAuthor = new Dictionary<string, long>(peerVector);
+        foreach (var did in ourClock.Keys) sinceByAuthor.TryAdd(did, 0);
+
         var eventsToSend = new List<SyncEventWire>();
-        foreach (var (did, peerMax) in peerVector.Concat(new[] { new KeyValuePair<string, long>(_identity.DeviceId, 0) }))
+        foreach (var (did, peerMax) in sinceByAuthor)
         {
             var ourMax = ourClock.GetValueOrDefault(did, 0);
             if (ourMax <= peerMax) continue;
             var missing = await _db.GetEventsSinceAsync(familyId, did, peerMax);
             foreach (var e in missing) eventsToSend.Add(SyncEventWire.From(e));
-        }
-        foreach (var did in ourClock.Keys)
-        {
-            if (peerVector.ContainsKey(did)) continue;
-            var all = await _db.GetEventsSinceAsync(familyId, did, 0);
-            foreach (var e in all) eventsToSend.Add(SyncEventWire.From(e));
         }
 
         await SendTypedAsync(stream, SyncMessageType.EventBatch, new EventBatchMessage { Events = eventsToSend }, ct);

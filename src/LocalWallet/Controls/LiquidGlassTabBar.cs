@@ -73,21 +73,23 @@ public class LiquidGlassTabBar : ContentView
             ColumnSpacing = 0,
             VerticalOptions = LayoutOptions.Fill,
             HorizontalOptions = LayoutOptions.Fill,
-            Padding = new Thickness(6, 4)
+            Padding = new Thickness(4, 4)
         };
 
+        // Pill lives inside the tabs grid and is anchored to the selected column
+        // via Grid.SetColumn — that way it always centers on the column regardless
+        // of total bar width, stroke, or padding.
         _activePill = new Border
         {
             BackgroundColor = Color.FromArgb("#2E7D32"),
             Stroke = Color.FromArgb("#40FFFFFF"),
             StrokeThickness = 1,
-            HorizontalOptions = LayoutOptions.Start,
+            HorizontalOptions = LayoutOptions.Fill,
             VerticalOptions = LayoutOptions.Fill,
-            WidthRequest = 60,
-            Margin = new Thickness(0, 8, 0, 8),
+            Margin = new Thickness(6, 6, 6, 6),
             Opacity = 0.92,
             InputTransparent = true,
-            StrokeShape = new RoundRectangle { CornerRadius = 16 }
+            StrokeShape = new RoundRectangle { CornerRadius = 14 }
         };
 
         // Idle shimmer: a wide soft-white gradient that slowly pans across.
@@ -136,7 +138,6 @@ public class LiquidGlassTabBar : ContentView
         layered.Children.Add(BlurBackdropHost);
         layered.Children.Add(tintOverlay);
         layered.Children.Add(_shimmerSweep);
-        layered.Children.Add(_activePill);
         layered.Children.Add(_tabsGrid);
         layered.Children.Add(specularRim);
 
@@ -184,6 +185,11 @@ public class LiquidGlassTabBar : ContentView
         for (int i = 0; i < Items.Count; i++)
             _tabsGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Star });
 
+        // Pill goes in first so it renders BENEATH the tab content above it.
+        var pillIndex = SelectedIndex >= 0 && SelectedIndex < Items.Count ? SelectedIndex : 0;
+        Grid.SetColumn(_activePill, pillIndex);
+        _tabsGrid.Children.Add(_activePill);
+
         for (int i = 0; i < Items.Count; i++)
         {
             var item = Items[i];
@@ -196,8 +202,6 @@ public class LiquidGlassTabBar : ContentView
             _tabsGrid.Children.Add(tab);
             _tabViews.Add(tab);
         }
-
-        LayoutActivePill(animate: false);
     }
 
     private View BuildTab(TabBarItem item, bool isSelected)
@@ -218,11 +222,15 @@ public class LiquidGlassTabBar : ContentView
         var label = new Label
         {
             Text = item.Title,
-            FontSize = 10,
+            FontSize = 9,
             HorizontalOptions = LayoutOptions.Center,
             VerticalOptions = LayoutOptions.Center,
             TextColor = labelColor,
-            LineBreakMode = LineBreakMode.TailTruncation
+            LineBreakMode = LineBreakMode.TailTruncation,
+            // The longest label ("Настройки", "Операции") needs to fit a ~70dp
+            // column on a typical phone. Lock max width to the column to keep
+            // truncation predictable instead of letting it push siblings out.
+            MaxLines = 1
         };
 
         return new VerticalStackLayout
@@ -238,7 +246,10 @@ public class LiquidGlassTabBar : ContentView
     {
         if (_tabViews.Count == 0) return;
         RecolorTabs();
-        LayoutActivePill(animate: oldIndex != newIndex);
+        if (newIndex >= 0 && newIndex < _tabViews.Count)
+        {
+            Grid.SetColumn(_activePill, newIndex);
+        }
     }
 
     private void RecolorTabs()
@@ -260,34 +271,9 @@ public class LiquidGlassTabBar : ContentView
         }
     }
 
-    private void LayoutActivePill(bool animate)
-    {
-        if (_tabViews.Count == 0 || SelectedIndex < 0 || SelectedIndex >= _tabViews.Count) return;
-
-        // Position by columns because tabs share equal-width columns.
-        var totalWidth = Width > 0 ? Width : 360;
-        var tabWidth = totalWidth / _tabViews.Count;
-        var pillWidth = Math.Min(tabWidth - 12, 80);
-        var targetX = (SelectedIndex * tabWidth) + (tabWidth - pillWidth) / 2;
-
-        _activePill.WidthRequest = pillWidth;
-
-        if (!animate)
-        {
-            _activePill.TranslationX = targetX;
-            return;
-        }
-
-        _activePill.AbortAnimation("move");
-        var startX = _activePill.TranslationX;
-        var anim = new Animation(v => _activePill.TranslationX = v, startX, targetX, Easing.SpringOut);
-        anim.Commit(_activePill, "move", length: 320);
-    }
-
     protected override void OnSizeAllocated(double width, double height)
     {
         base.OnSizeAllocated(width, height);
-        LayoutActivePill(animate: false);
         _shimmerSweep.WidthRequest = Math.Max(120, width * 0.4);
     }
 

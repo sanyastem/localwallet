@@ -24,7 +24,7 @@
                     <Shadow Brush="Black" Opacity="0.18" Radius="16" Offset="0,8" />
                 </Border.Shadow>
                 <VerticalStackLayout Spacing="6">
-                    <Label Text="Добро пожаловать в LocalWallet" FontSize="22" FontAttributes="Bold" TextColor="White" />
+                    <Label Text="Добро пожаловать в Local Wallet" FontSize="22" FontAttributes="Bold" TextColor="White" />
                     <Label Text="Настройте валюты и безопасность за одну минуту" FontSize="13" TextColor="#CCFFFFFF" />
                 </VerticalStackLayout>
             </Border>

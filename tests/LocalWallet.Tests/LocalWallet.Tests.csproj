@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>LocalWallet.Tests</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.4" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <!--
+    The main LocalWallet project targets net10.0-android only and pulls in MAUI,
+    so we cannot ProjectReference it. Instead we link individual source files
+    that have no MAUI / Android / SQLite dependencies and exercise them here.
+  -->
+  <ItemGroup>
+    <Compile Include="..\..\src\LocalWallet\Services\Crypto\IFamilyCryptoService.cs"
+             Link="LinkedSources\IFamilyCryptoService.cs" />
+    <Compile Include="..\..\src\LocalWallet\Services\Crypto\FamilyCryptoService.cs"
+             Link="LinkedSources\FamilyCryptoService.cs" />
+    <Compile Include="..\..\src\LocalWallet\Services\Family\InvitationCodec.cs"
+             Link="LinkedSources\InvitationCodec.cs" />
+    <Compile Include="..\..\src\LocalWallet\Services\Sync\LamportOrder.cs"
+             Link="LinkedSources\LamportOrder.cs" />
+  </ItemGroup>
+
+</Project>

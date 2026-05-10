@@ -30,7 +30,9 @@ public static class LiquidGlassBlur
     private static void ApplyRealtimeBlur(global::Android.Views.View? nativeView)
     {
         if (nativeView is null) return;
-        if (Build.VERSION.SdkInt < BuildVersionCodes.S) return; // Android 12 = API 31
+        // OperatingSystem.IsAndroidVersionAtLeast feeds the platform analyzer (CA1416),
+        // unlike the equivalent Build.VERSION.SdkInt check which it can't reason about.
+        if (!OperatingSystem.IsAndroidVersionAtLeast(31)) return;
 
         try
         {

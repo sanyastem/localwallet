@@ -9,7 +9,7 @@
              Title="Операции">
 
     <Grid Background="{StaticResource AmbientBg}">
-        <Grid RowDefinitions="Auto,*" Padding="16,12,16,96" RowSpacing="10">
+        <Grid RowDefinitions="Auto,*" Padding="16,12,16,100" RowSpacing="10">
 
             <Border Grid.Row="0" Style="{StaticResource GlassCard}" Padding="14,12">
                 <Grid ColumnDefinitions="*,*" ColumnSpacing="8">

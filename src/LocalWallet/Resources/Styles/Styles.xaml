@@ -13,20 +13,13 @@
     <Color x:Key="Outline">#E0E0E0</Color>
     <Color x:Key="OutlineDark">#303030</Color>
 
+    <!-- Implicit styles only. Keyed legacy styles (Card, InputWrap,
+         SectionHeader, FieldLabel, Secondary, Fab) were removed in v2.8.2 —
+         every page now uses the GlassTokens equivalents. -->
+
     <Style TargetType="Label">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource White}}" />
         <Setter Property="FontSize" Value="14" />
-    </Style>
-
-    <Style TargetType="Label" x:Key="SectionHeader">
-        <Setter Property="FontSize" Value="20" />
-        <Setter Property="FontAttributes" Value="Bold" />
-        <Setter Property="Margin" Value="0,4,0,2" />
-    </Style>
-
-    <Style TargetType="Label" x:Key="FieldLabel">
-        <Setter Property="FontSize" Value="12" />
-        <Setter Property="TextColor" Value="{StaticResource Gray500}" />
     </Style>
 
     <Style TargetType="Button">
@@ -39,26 +32,6 @@
         <Setter Property="MinimumHeightRequest" Value="50" />
     </Style>
 
-    <Style TargetType="Button" x:Key="Secondary">
-        <Setter Property="BackgroundColor" Value="Transparent" />
-        <Setter Property="TextColor" Value="{StaticResource Primary}" />
-        <Setter Property="BorderColor" Value="{StaticResource Primary}" />
-        <Setter Property="BorderWidth" Value="1.5" />
-    </Style>
-
-    <Style TargetType="Button" x:Key="Fab">
-        <Setter Property="WidthRequest" Value="60" />
-        <Setter Property="HeightRequest" Value="60" />
-        <Setter Property="MinimumHeightRequest" Value="60" />
-        <Setter Property="MinimumWidthRequest" Value="60" />
-        <Setter Property="CornerRadius" Value="30" />
-        <Setter Property="Padding" Value="0" />
-        <Setter Property="FontSize" Value="30" />
-        <Setter Property="FontAttributes" Value="None" />
-        <Setter Property="TextColor" Value="White" />
-        <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
-    </Style>
-
     <Style TargetType="Entry">
         <Setter Property="FontSize" Value="15" />
         <Setter Property="PlaceholderColor" Value="{StaticResource Gray400}" />
@@ -66,20 +39,6 @@
 
     <Style TargetType="Editor">
         <Setter Property="FontSize" Value="15" />
-    </Style>
-
-    <Style TargetType="Border" x:Key="Card">
-        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource Outline}, Dark={StaticResource OutlineDark}}" />
-        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}" />
-        <Setter Property="StrokeShape" Value="RoundRectangle 14" />
-        <Setter Property="Padding" Value="16" />
-    </Style>
-
-    <Style TargetType="Border" x:Key="InputWrap">
-        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource Outline}, Dark={StaticResource OutlineDark}}" />
-        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource SurfaceAlt}, Dark={StaticResource SurfaceAltDark}}" />
-        <Setter Property="StrokeShape" Value="RoundRectangle 12" />
-        <Setter Property="Padding" Value="12,2" />
     </Style>
 
     <Style TargetType="Shell" ApplyToDerivedTypes="True">

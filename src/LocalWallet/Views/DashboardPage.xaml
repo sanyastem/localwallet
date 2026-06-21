@@ -9,7 +9,7 @@
              Title="Главная">
 
     <Grid Background="{StaticResource AmbientBg}">
-        <Grid RowDefinitions="Auto,Auto,*" Padding="16,12,16,96" RowSpacing="14">
+        <Grid RowDefinitions="Auto,Auto,*" Padding="16,12,16,100" RowSpacing="14">
 
             <!-- Hero: balance card. Accent gradient + specular edge. -->
             <Border Grid.Row="0"

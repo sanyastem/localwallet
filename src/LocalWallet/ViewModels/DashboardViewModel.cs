@@ -93,6 +93,19 @@ public partial class DashboardViewModel : BaseViewModel
     [RelayCommand]
     private async Task CreateAccountAsync() => await NavigateAsync(nameof(AccountsPage));
 
+    // Home quick-actions — "настроить всё с главной".
+    [RelayCommand]
+    private async Task OpenAccountsAsync() => await NavigateAsync(nameof(AccountsPage));
+
+    [RelayCommand]
+    private async Task OpenCategoriesAsync() => await NavigateAsync(nameof(CategoriesPage));
+
+    [RelayCommand]
+    private async Task OpenFamiliesAsync() => await NavigateAsync(nameof(FamilyListPage));
+
+    [RelayCommand]
+    private async Task OpenStatisticsAsync() => await NavigateAsync(nameof(StatisticsPage));
+
     private static async Task NavigateAsync(string route)
     {
         try

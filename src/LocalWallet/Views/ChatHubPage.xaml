@@ -54,7 +54,7 @@
                                     <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="10">
                                         <Label Grid.Row="0" Grid.Column="0" Text="{Binding Name}" FontAttributes="Bold" FontSize="16" />
                                         <Label Grid.Row="1" Grid.Column="0" Text="{Binding Role}" Style="{StaticResource Caption}" />
-                                        <Label Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" Text="›" FontSize="22" TextColor="{StaticResource TextSecondaryLight}" VerticalOptions="Center" />
+                                        <Label Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" Text="›" FontSize="22" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" VerticalOptions="Center" />
                                     </Grid>
                                 </Border>
                             </DataTemplate>

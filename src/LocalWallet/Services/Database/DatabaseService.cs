@@ -420,6 +420,13 @@ public class DatabaseService : IDatabaseService
         await db.DeleteAllAsync<Category>();
         await db.DeleteAllAsync<ChatMessage>();
         await db.DeleteAllAsync<ExchangeRate>();
+        // A full reset must also leave the user out of every family and clear
+        // the event log + chat history. Otherwise stale memberships and events
+        // survive a "сбросить все данные", and the next peer discovery resyncs
+        // data the user thought they wiped.
+        await db.DeleteAllAsync<Family>();
+        await db.DeleteAllAsync<FamilyMember>();
+        await db.DeleteAllAsync<SyncEvent>();
         await db.DeleteAllAsync<AppSettings>();
         // Intentionally keep DeviceIdentity: device keypair is tied to SecureStorage
         // and regenerating on reset would orphan any family memberships.

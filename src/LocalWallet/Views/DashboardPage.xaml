@@ -9,7 +9,7 @@
              Title="Главная">
 
     <Grid Background="{StaticResource AmbientBg}">
-        <Grid RowDefinitions="Auto,*" Padding="16,12,16,96" RowSpacing="14">
+        <Grid RowDefinitions="Auto,Auto,*" Padding="16,12,16,96" RowSpacing="14">
 
             <!-- Hero: balance card. Accent gradient + specular edge. -->
             <Border Grid.Row="0"
@@ -36,8 +36,49 @@
                 </VerticalStackLayout>
             </Border>
 
+            <!-- Quick actions: manage everything from home. The Семья tile is
+                 always shown so creating/joining a family is one tap away. -->
+            <Grid Grid.Row="1" ColumnDefinitions="*,*,*,*" ColumnSpacing="10">
+                <Border Grid.Column="0" Style="{StaticResource GlassRow}" Padding="6,12">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding OpenAccountsCommand}" />
+                    </Border.GestureRecognizers>
+                    <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                        <Label Text="💼" FontSize="22" HorizontalOptions="Center" />
+                        <Label Text="Счета" Style="{StaticResource Caption}" HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+                </Border>
+                <Border Grid.Column="1" Style="{StaticResource GlassRow}" Padding="6,12">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding OpenCategoriesCommand}" />
+                    </Border.GestureRecognizers>
+                    <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                        <Label Text="🏷" FontSize="22" HorizontalOptions="Center" />
+                        <Label Text="Категории" Style="{StaticResource Caption}" HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+                </Border>
+                <Border Grid.Column="2" Style="{StaticResource GlassRow}" Padding="6,12">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding OpenFamiliesCommand}" />
+                    </Border.GestureRecognizers>
+                    <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                        <Label Text="👪" FontSize="22" HorizontalOptions="Center" />
+                        <Label Text="Семья" Style="{StaticResource Caption}" HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+                </Border>
+                <Border Grid.Column="3" Style="{StaticResource GlassRow}" Padding="6,12">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding OpenStatisticsCommand}" />
+                    </Border.GestureRecognizers>
+                    <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                        <Label Text="📊" FontSize="22" HorizontalOptions="Center" />
+                        <Label Text="Статистика" Style="{StaticResource Caption}" HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+                </Border>
+            </Grid>
+
             <!-- Feed -->
-            <Grid Grid.Row="1" RowDefinitions="Auto,*" RowSpacing="10">
+            <Grid Grid.Row="2" RowDefinitions="Auto,*" RowSpacing="10">
                 <Label Grid.Row="0"
                        Text="Последние операции"
                        Style="{StaticResource H2}"
